@@ -80,26 +80,31 @@ export async function POST(request: Request) {
         const finalCode = debug ? wrapCodeForTracing(code, language as Language) : code;
 
         /* ── 4. Determine Execution Engine ─────────────────────── */
-        const judge0Key = process.env.JUDGE0_API_KEY;
+        const judge0Url = process.env.JUDGE0_API_URL || "http://localhost:2358";
+        const judge0Token = process.env.JUDGE0_AUTH_TOKEN || "";
         const startTime = performance.now();
 
-        // ROUTE A: Judge0 via RapidAPI (Option 1)
-        if (judge0Key) {
-            const langId = JUDGE0_LANGUAGES[language as Language];
-            if (!langId) return NextResponse.json({ error: `Unsupported language: ${language}` }, { status: 400 });
+        const langId = JUDGE0_LANGUAGES[language as Language];
+        if (!langId) return NextResponse.json({ error: `Unsupported language: ${language}` }, { status: 400 });
 
-            const response = await fetch("https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-rapidapi-host": "judge0-ce.p.rapidapi.com",
-                    "x-rapidapi-key": judge0Key,
-                },
-                body: JSON.stringify({
-                    source_code: finalCode,
-                    language_id: langId,
-                }),
-            });
+        // Judge0 Self-Hosted
+        const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+        };
+        
+        // Add auth token if configured on the self-hosted instance
+        if (judge0Token) {
+            headers["X-Auth-Token"] = judge0Token;
+        }
+
+        const response = await fetch(`${judge0Url}/submissions?base64_encoded=false&wait=true`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                source_code: finalCode,
+                language_id: langId,
+            }),
+        });
 
             const executionTimeMs = Math.round(performance.now() - startTime);
             if (!response.ok) {
@@ -132,69 +137,6 @@ export async function POST(request: Request) {
                 executionTimeMs,
                 steps,
             });
-        }
-
-        // ROUTE B: Piston (Option 2 - Local or Fly.io)
-        const pistonUrl = process.env.PISTON_API_URL || "http://127.0.0.1:2000/api/v2/execute";
-        const version = PISTON_VERSIONS[language as Language];
-        if (!version) return NextResponse.json({ error: `Unsupported language: ${language}` }, { status: 400 });
-
-        const response = await fetch(pistonUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "User-Agent": "CodeAlchemist-NextJs/1.0",
-            },
-            body: JSON.stringify({
-                language,
-                version,
-                files: [{ content: finalCode }],
-                compile_timeout: 10000,
-                run_timeout: 3000,
-            }),
-        });
-
-        const executionTimeMs = Math.round(performance.now() - startTime);
-
-        if (!response.ok) {
-            const errText = await response.text();
-            return NextResponse.json({ success: false, output: "", error: `Piston error: ${errText}`, executionTimeMs }, { status: 500 });
-        }
-
-        const data = await response.json();
-        let output = "";
-        let error: string | null = null;
-        let success = true;
-        let steps = undefined;
-
-        if (data.compile && data.compile.code !== 0) {
-            success = false;
-            error = data.compile.stderr || data.compile.output || "Compilation failed";
-        } else if (data.run) {
-            success = data.run.code === 0 && !data.run.signal;
-            const rawStdout = data.run.stdout || "";
-            
-            if (debug) {
-                const traceResult = extractTrace(rawStdout);
-                output = traceResult.output;
-                steps = traceResult.steps;
-            } else {
-                output = rawStdout;
-            }
-
-            if (!success) {
-                error = data.run.stderr || data.run.output || `Process exited with code ${data.run.code}`;
-            }
-        }
-
-        return NextResponse.json({
-            success,
-            output: output.trim(),
-            error: error ? error.trim() : null,
-            executionTimeMs,
-            steps,
-        });
-
     } catch (err) {
         return NextResponse.json({
             success: false,
