@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  # ── Next.js Application ──────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codealchemist-app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - PISTON_API_URL=http://piston:2000/api/v2/execute
+    env_file:
+      - .env
+    depends_on:
+      - piston
+    networks:
+      - codealchemist
+
+  # ── Piston Code Execution Engine ─────────────────────────────
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: codealchemist-piston
+    ports:
+      - "2000:2000"
+    restart: unless-stopped
+    privileged: true
+    # Piston uses 'isolate' internally which requires tmpfs and specific privileges
+    tmpfs:
+      - /tmp:exec
+    # Persist installed languages between restarts
+    volumes:
+      - piston-data:/piston/packages
+    # Prevent runaway processes from taking down the host
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+    networks:
+      - codealchemist
+
+networks:
+  codealchemist:
+    driver: bridge
+
+volumes:
+  piston-data:

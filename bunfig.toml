@@ -1,0 +1,10 @@
+# CodeAlchemist Bun Configuration
+# Ensures the project runs exclusively with Bun runtime
+
+[install]
+# Use exact versions from lockfile
+exact = true
+
+[run]
+# Silence warnings during dev
+silent = false
