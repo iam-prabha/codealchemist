@@ -38,12 +38,6 @@ setInterval(() => {
 /* ── Engine Configs ─────────────────────────────────────────── */
 const MAX_CODE_LENGTH = 50_000;
 
-const PISTON_VERSIONS: Record<Language, string> = {
-    python: "3.10.0",
-    rust: "1.68.2",
-    typescript: "5.0.3",
-};
-
 // Judge0 Language IDs (CE Edition)
 const JUDGE0_LANGUAGES: Record<Language, number> = {
     python: 71,      // Python 3.8.1
@@ -97,46 +91,50 @@ export async function POST(request: Request) {
             headers["X-Auth-Token"] = judge0Token;
         }
 
-        const response = await fetch(`${judge0Url}/submissions?base64_encoded=false&wait=true`, {
+        const response = await fetch(`${judge0Url}/submissions?base64_encoded=true&wait=true`, {
             method: "POST",
             headers,
             body: JSON.stringify({
-                source_code: finalCode,
+                source_code: Buffer.from(finalCode).toString("base64"),
                 language_id: langId,
             }),
         });
 
-            const executionTimeMs = Math.round(performance.now() - startTime);
-            if (!response.ok) {
-                const errText = await response.text();
-                return NextResponse.json({ success: false, output: "", error: `Judge0 error: ${errText}`, executionTimeMs }, { status: 500 });
-            }
+        const executionTimeMs = Math.round(performance.now() - startTime);
+        if (!response.ok) {
+            const errText = await response.text();
+            return NextResponse.json({ success: false, output: "", error: `Judge0 error: ${errText}`, executionTimeMs }, { status: 500 });
+        }
 
-            const data = await response.json();
-            
-            // Judge0 returns compilation errors in 'compile_output' and runtime errors in 'stderr'
-            const hasError = data.status?.id !== 3; // 3 = Accepted
-            const rawStdout = data.stdout || "";
-            const rawStderr = data.stderr || data.compile_output || data.message || `Process exited with status: ${data.status?.description}`;
+        const data = await response.json();
+        
+        // Judge0 returns compilation errors in 'compile_output' and runtime errors in 'stderr'
+        const hasError = data.status?.id !== 3; // 3 = Accepted
+        
+        // Decode base64 outputs safely
+        const decodeB64 = (str?: string | null) => str ? Buffer.from(str, "base64").toString("utf-8") : "";
+        
+        const rawStdout = decodeB64(data.stdout);
+        const rawStderr = decodeB64(data.stderr) || decodeB64(data.compile_output) || (data.message ? decodeB64(data.message) : "") || (hasError ? `Process exited with status: ${data.status?.description}` : "");
 
-            let output = "";
-            let steps = undefined;
+        let output = "";
+        let steps = undefined;
 
-            if (debug && !hasError) {
-                const traceResult = extractTrace(rawStdout);
-                output = traceResult.output;
-                steps = traceResult.steps;
-            } else {
-                output = rawStdout;
-            }
+        if (debug && !hasError) {
+            const traceResult = extractTrace(rawStdout);
+            output = traceResult.output;
+            steps = traceResult.steps;
+        } else {
+            output = rawStdout;
+        }
 
-            return NextResponse.json({
-                success: !hasError,
-                output: output.trim(),
-                error: hasError ? rawStderr.trim() : null,
-                executionTimeMs,
-                steps,
-            });
+        return NextResponse.json({
+            success: !hasError,
+            output: output.trim(),
+            error: hasError ? rawStderr.trim() : null,
+            executionTimeMs,
+            steps,
+        });
     } catch (err) {
         return NextResponse.json({
             success: false,
