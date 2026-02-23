@@ -12,6 +12,9 @@ export const auth = betterAuth({
         provider: "pg",
     }),
 
+    baseURL: process.env.BETTER_AUTH_URL,
+    trustedOrigins: ["https://codealchemist-theta.vercel.app"],
+
     emailAndPassword: {
         enabled: true,
     },
