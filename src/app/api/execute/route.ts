@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 import type { Language } from "@/types";
 import { wrapCodeForTracing, extractTrace } from "@/lib/execution/tracer";
 
@@ -47,16 +48,19 @@ const JUDGE0_LANGUAGES: Record<Language, number> = {
 
 export async function POST(request: Request) {
     try {
-        /* ── 1. Auth check ────────────────────────────────────── */
-        const cookieStore = await cookies();
-        const sessionToken = cookieStore.get("better-auth.session_token");
-        if (!sessionToken) {
-            return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+        /* ── 1. Auth check (Strict validation via Better Auth) ──────── */
+        const session = await auth.api.getSession({
+            headers: await headers(),
+        });
+
+        if (!session || !session.user) {
+            return NextResponse.json({ error: "Authentication required or session invalid." }, { status: 401 });
         }
 
         /* ── 2. Rate limiting ─────────────────────────────────── */
-        const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
-                   request.headers.get("x-real-ip") || "unknown";
+        const reqHeaders = await headers();
+        const ip = reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                   reqHeaders.get("x-real-ip") || "unknown";
 
         if (!checkRateLimit(ip)) {
             return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
@@ -82,18 +86,18 @@ export async function POST(request: Request) {
         if (!langId) return NextResponse.json({ error: `Unsupported language: ${language}` }, { status: 400 });
 
         // Judge0 Self-Hosted
-        const headers: Record<string, string> = {
+        const fetchHeaders: Record<string, string> = {
             "Content-Type": "application/json",
         };
         
         // Add auth token if configured on the self-hosted instance
         if (judge0Token) {
-            headers["X-Auth-Token"] = judge0Token;
+            fetchHeaders["X-Auth-Token"] = judge0Token;
         }
 
         const response = await fetch(`${judge0Url}/submissions?base64_encoded=true&wait=true`, {
             method: "POST",
-            headers,
+            headers: fetchHeaders,
             body: JSON.stringify({
                 source_code: Buffer.from(finalCode).toString("base64"),
                 language_id: langId,
