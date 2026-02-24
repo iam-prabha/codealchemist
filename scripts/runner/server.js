@@ -61,7 +61,9 @@ app.post('/execute', async (req, res) => {
 
     try {
         // 3. Write code to file
-        await writeFile(filePath, code, 'utf8');
+        // Base64 decode the incoming code (Vercel sends it encoded for safety)
+        const decodedCode = Buffer.from(code, 'base64').toString('utf8');
+        await writeFile(filePath, decodedCode, 'utf8');
 
         // 4. Execute Code (Sandboxed to restricted user 'runneruser')
         // We use a 3000ms timeout to prevent infinite loops from hanging the server
@@ -78,14 +80,21 @@ app.post('/execute', async (req, res) => {
             }
 
             // 6. Return response matching the expected format of our Next.js backend
+            // Encode stdout and stderr back to base64 for safe transport to Vercel
+            const safeStdout = Buffer.from(stdout || '').toString('base64');
+            let safeStderr = '';
+            
             if (error) {
                 if (error.killed) {
-                    return res.json({ success: false, output: stdout, error: "Execution Timed Out (3 seconds max)" });
+                    safeStderr = Buffer.from("Execution Timed Out (3 seconds max)").toString('base64');
+                } else {
+                    safeStderr = Buffer.from(stderr || error.message || '').toString('base64');
                 }
-                return res.json({ success: false, output: stdout, error: stderr || error.message });
+                return res.json({ success: false, stdout: safeStdout, stderr: safeStderr, compile_output: null, message: null, status: { id: 4, description: 'Error' } });
             }
 
-            return res.json({ success: true, output: stdout, error: stderr || null });
+            safeStderr = Buffer.from(stderr || '').toString('base64');
+            return res.json({ success: true, stdout: safeStdout, stderr: safeStderr, compile_output: null, message: null, status: { id: 3, description: 'Accepted' } });
         });
 
     } catch (err) {
