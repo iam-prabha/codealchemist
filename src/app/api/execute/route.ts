@@ -6,7 +6,7 @@ import { wrapCodeForTracing, extractTrace } from "@/lib/execution/tracer";
 
 /**
  * Code Execution Proxy Route
- * Supports both Piston (Self-hosted) and Judge0 (RapidAPI Free Tier).
+ * Supports both Piston (Self-hosted) and CustomRunner (RapidAPI Free Tier).
  *
  * Security: Requires authentication + rate limiting (30 req/min per IP).
  */
@@ -39,13 +39,6 @@ setInterval(() => {
 /* ── Engine Configs ─────────────────────────────────────────── */
 const MAX_CODE_LENGTH = 50_000;
 
-// Judge0 Language IDs (CE Edition)
-const JUDGE0_LANGUAGES: Record<Language, number> = {
-    python: 71,      // Python 3.8.1
-    rust: 73,        // Rust 1.40.0
-    typescript: 74,  // TypeScript 3.7.4
-};
-
 export async function POST(request: Request) {
     try {
         /* ── 1. Auth check (Strict validation via Better Auth) ──────── */
@@ -77,65 +70,51 @@ export async function POST(request: Request) {
 
         const finalCode = debug ? wrapCodeForTracing(code, language as Language) : code;
 
-        /* ── 4. Determine Execution Engine ─────────────────────── */
-        const judge0Url = process.env.JUDGE0_API_URL || "http://localhost:2358";
-        const judge0Token = process.env.JUDGE0_AUTH_TOKEN || "";
+        /* ── 4. Execute via Custom Runner ─────────────────────── */
+        const runnerUrl = process.env.RUNNER_API_URL || "http://localhost:2358";
+        const runnerToken = process.env.RUNNER_AUTH_TOKEN || "";
         const startTime = performance.now();
 
-        const langId = JUDGE0_LANGUAGES[language as Language];
-        if (!langId) return NextResponse.json({ error: `Unsupported language: ${language}` }, { status: 400 });
-
-        // Judge0 Self-Hosted
         const fetchHeaders: Record<string, string> = {
             "Content-Type": "application/json",
         };
         
-        // Add auth token if configured on the self-hosted instance
-        if (judge0Token) {
-            fetchHeaders["X-Auth-Token"] = judge0Token;
+        if (runnerToken) {
+            fetchHeaders["X-Auth-Token"] = runnerToken;
         }
 
-        const response = await fetch(`${judge0Url}/submissions?base64_encoded=true&wait=true`, {
+        const response = await fetch(`${runnerUrl}/execute`, {
             method: "POST",
             headers: fetchHeaders,
             body: JSON.stringify({
-                source_code: Buffer.from(finalCode).toString("base64"),
-                language_id: langId,
+                language,
+                code: finalCode,
             }),
         });
 
         const executionTimeMs = Math.round(performance.now() - startTime);
         if (!response.ok) {
             const errText = await response.text();
-            return NextResponse.json({ success: false, output: "", error: `Judge0 error: ${errText}`, executionTimeMs }, { status: 500 });
+            return NextResponse.json({ success: false, output: "", error: `Runner error: ${errText}`, executionTimeMs }, { status: 500 });
         }
 
         const data = await response.json();
         
-        // Judge0 returns compilation errors in 'compile_output' and runtime errors in 'stderr'
-        const hasError = data.status?.id !== 3; // 3 = Accepted
-        
-        // Decode base64 outputs safely
-        const decodeB64 = (str?: string | null) => str ? Buffer.from(str, "base64").toString("utf-8") : "";
-        
-        const rawStdout = decodeB64(data.stdout);
-        const rawStderr = decodeB64(data.stderr) || decodeB64(data.compile_output) || (data.message ? decodeB64(data.message) : "") || (hasError ? `Process exited with status: ${data.status?.description}` : "");
-
         let output = "";
         let steps = undefined;
 
-        if (debug && !hasError) {
-            const traceResult = extractTrace(rawStdout);
+        if (debug && data.success) {
+            const traceResult = extractTrace(data.output || "");
             output = traceResult.output;
             steps = traceResult.steps;
         } else {
-            output = rawStdout;
+            output = data.output || "";
         }
 
         return NextResponse.json({
-            success: !hasError,
+            success: data.success,
             output: output.trim(),
-            error: hasError ? rawStderr.trim() : null,
+            error: data.error ? data.error.trim() : null,
             executionTimeMs,
             steps,
         });
