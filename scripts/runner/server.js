@@ -1,9 +1,9 @@
 import express, { json } from 'express';
 import cors from 'cors';
-import { exec } from 'child_process';
-import { writeFile, unlink } from 'fs/promises';
-import { join } from 'path';
-import { randomBytes } from 'crypto';
+import { exec } from 'node:child_process';
+import { writeFile, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
+import { randomBytes } from 'node:crypto';
 
 const app = express();
 app.use(cors());
