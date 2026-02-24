@@ -1,5 +1,19 @@
 import type { Metadata, Viewport } from "next";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+// ── Google Fonts (Optimized by Next.js) ────────────────────────
+const spaceGrotesk = Space_Grotesk({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-space",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
     title: "CodeAlchemist — Transmute Code Into Mastery",
@@ -32,20 +46,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <head>
-                {/* JetBrains Mono — Primary code font */}
-                <link rel="preconnect" href="https://fonts.googleapis.com" />
-                <link
-                    rel="preconnect"
-                    href="https://fonts.gstatic.com"
-                    crossOrigin="anonymous"
-                />
-                <link
-                    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-                    rel="stylesheet"
-                />
-            </head>
-            <body className="antialiased">{children}</body>
+            <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
+                {children}
+            </body>
         </html>
     );
 }
