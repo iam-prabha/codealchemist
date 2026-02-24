@@ -4,16 +4,18 @@ FROM ubuntu:22.04
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies (Python, Node.js, Rust, build tools)
+# Install core dependencies (Python, Rust, build tools)
 RUN apt-get update && apt-get install -y \
     curl \
     python3 \
     python3-pip \
-    nodejs \
-    npm \
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
+
+# Install Modern Node.js (Node 20) instead of Ubuntu's default ancient Node 12
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs
 
 # Install Rust globally for all users
 ENV RUSTUP_HOME=/usr/local/rustup \
