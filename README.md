@@ -114,30 +114,26 @@ codealchemist/
 
 | Language | Engine | Environment |
 |---|---|---|
-| **TypeScript/JS** | Bun subprocess | Server-side (API route) |
-| **Python** | Pyodide (WASM) | Client-side (browser) |
-| **Rust** | Mock executor | Demo (future: WASM/server) |
+| **Python, Rust, TS** | Custom Docker Runner | Server-side (Koyeb / Render / AWS) |
 
 ---
 
 ## 🚢 Deployment
 
-### Vercel (Recommended)
+CodeAlchemist uses a split-deployment model for security and performance.
 
-```bash
-# Build for production
-bun run build
+### 1. Deploy Frontend (Vercel)
+Deploy the main Next.js repository to Vercel. Ensure you provide the `DATABASE_URL` (using the Transaction Pooler port 6543) and all OAuth credentials.
 
-# Deploy to Vercel
-bunx vercel --prod
-```
+### 2. Deploy Custom Runner (Koyeb / Render)
+The execution engine must run in a Docker container to provide the necessary compilers (Python, Rust, Node).
+1. Connect Koyeb or Render to this repository.
+2. Set the build directory to `scripts/runner`.
+3. Set an environment variable `AUTH_TOKEN` with a secure password.
+4. Deploy the Docker container.
 
-### Self-hosted
-
-```bash
-bun run build
-bun run start
-```
+### 3. Link them together
+Add the Koyeb/Render URL to your Vercel Environment Variables as `RUNNER_API_URL` and the secret password as `RUNNER_AUTH_TOKEN`. Redeploy Vercel.
 
 ---
 
