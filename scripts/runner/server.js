@@ -44,8 +44,8 @@ app.post('/execute', async (req, res) => {
         case 'typescript':
         case 'ts':
             fileName = `${runId}.ts`;
-            // Use tsx for robust ES module execution
-            command = `tsx ${CODE_DIR}/${fileName}`;
+            // Use npx tsx for robust ES module execution, ensuring it resolves the global package
+            command = `npx tsx ${CODE_DIR}/${fileName}`;
             break;
         case 'rust':
             fileName = `${runId}.rs`;
@@ -66,8 +66,8 @@ app.post('/execute', async (req, res) => {
         await writeFile(filePath, decodedCode, 'utf8');
 
         // 4. Execute Code (Sandboxed to restricted user 'runneruser')
-        // We use a 3000ms timeout to prevent infinite loops from hanging the server
-        exec(`su -c "${command}" runneruser`, { timeout: 3000 }, async (error, stdout, stderr) => {
+        // We use a 8000ms timeout to allow heavy TS compilations to finish, preventing premature deaths
+        exec(`su -c "${command}" runneruser`, { timeout: 8000 }, async (error, stdout, stderr) => {
             
             // 5. Cleanup temporary files immediately
             try {
@@ -86,7 +86,7 @@ app.post('/execute', async (req, res) => {
             
             if (error) {
                 if (error.killed) {
-                    safeStderr = Buffer.from("Execution Timed Out (3 seconds max)").toString('base64');
+                    safeStderr = Buffer.from("Execution Timed Out (8 seconds max)").toString('base64');
                 } else {
                     safeStderr = Buffer.from(stderr || error.message || '').toString('base64');
                 }
