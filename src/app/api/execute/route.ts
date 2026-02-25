@@ -100,21 +100,27 @@ export async function POST(request: Request) {
 
         const data = await response.json();
         
+        // Custom Runner returns base64 encoded stdout and stderr
+        const decodeB64 = (str?: string | null) => str ? Buffer.from(str, "base64").toString("utf-8") : "";
+        
+        const rawStdout = decodeB64(data.stdout);
+        const rawStderr = decodeB64(data.stderr);
+
         let output = "";
         let steps = undefined;
 
         if (debug && data.success) {
-            const traceResult = extractTrace(data.output || "");
+            const traceResult = extractTrace(rawStdout);
             output = traceResult.output;
             steps = traceResult.steps;
         } else {
-            output = data.output || "";
+            output = rawStdout;
         }
 
         return NextResponse.json({
             success: data.success,
             output: output.trim(),
-            error: data.error ? data.error.trim() : null,
+            error: rawStderr ? rawStderr.trim() : null,
             executionTimeMs,
             steps,
         });

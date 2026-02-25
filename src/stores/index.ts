@@ -44,7 +44,7 @@ interface EditorState {
 }
 
 export const useEditorStore = create<EditorState>()((set) => ({
-    activeLanguage: "typescript",
+    activeLanguage: "python",
     setActiveLanguage: (lang) => set({ activeLanguage: lang }),
 
     editorCode: {
@@ -61,7 +61,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
     toggleExample: () =>
         set((state) => ({ exampleRevealed: !state.exampleRevealed })),
 
-    activeLayerId: 3,
+    activeLayerId: 1,
     setActiveLayerId: (id) =>
         set({
             activeLayerId: id,
