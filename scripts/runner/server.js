@@ -44,14 +44,14 @@ app.post('/execute', async (req, res) => {
         case 'typescript':
         case 'ts':
             fileName = `${runId}.ts`;
-            // Use ts-node for instant TypeScript execution
-            command = `ts-node ${CODE_DIR}/${fileName}`;
+            // Use tsx for robust ES module execution
+            command = `tsx ${CODE_DIR}/${fileName}`;
             break;
         case 'rust':
             fileName = `${runId}.rs`;
             const exeName = `${runId}_bin`;
-            // Rust requires compilation first, then execution
-            command = `rustc ${CODE_DIR}/${fileName} -o ${CODE_DIR}/${exeName} && ${CODE_DIR}/${exeName}`;
+            // Use absolute path for rustc because 'su' strips the PATH variable
+            command = `/usr/local/cargo/bin/rustc ${CODE_DIR}/${fileName} -o ${CODE_DIR}/${exeName} && ${CODE_DIR}/${exeName}`;
             break;
         default:
             return res.status(400).json({ error: `Unsupported language: ${language}` });

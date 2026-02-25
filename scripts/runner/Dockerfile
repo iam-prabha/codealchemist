@@ -23,8 +23,8 @@ ENV RUSTUP_HOME=/usr/local/rustup \
     PATH=/usr/local/cargo/bin:$PATH
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal
 
-# Install TypeScript globally
-RUN npm install -g typescript ts-node
+# Install TypeScript globally (using tsx which handles ESM out of the box)
+RUN npm install -g typescript tsx
 
 # Create a restricted user to run the untrusted code securely
 RUN useradd -m -s /bin/bash runneruser
