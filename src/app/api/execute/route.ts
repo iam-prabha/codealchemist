@@ -88,7 +88,7 @@ export async function POST(request: Request) {
             headers: fetchHeaders,
             body: JSON.stringify({
                 language,
-                code: finalCode,
+                code: Buffer.from(finalCode).toString("base64"),
             }),
         });
 
