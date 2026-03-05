@@ -7,48 +7,39 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
-  Square,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  Bug,
-  ChevronLeft,
-  ChevronRight,
-  Wand2,
-  Timer,
+    Square,
+    ChevronLeft,
+    ChevronRight,
+    Wand2,
+    Timer,
 } from "lucide-react";
 import { useEditorStore, useExecutionStore } from "@/stores";
 import { getLayer } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
 
 interface EditorToolbarProps {
-  onExecute: () => void;
+    onExecute: () => void;
 }
 
 export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
-  const {
-    activeLayerId,
-    activeExerciseIndex,
-    setActiveExerciseIndex,
-    practiceMode,
-    challengeStartTime,
-  } = useEditorStore();
-  const {
-    isRunning,
-    debuggerActive,
-    toggleDebugger,
-    stepForward,
-    stepBackward,
-    currentStep,
-    totalSteps,
-  } = useExecutionStore();
+    const {
+        activeLayerId,
+        activeExerciseIndex,
+        setActiveExerciseIndex,
+        practiceMode,
+        challengeStartTime,
+    } = useEditorStore();
+    const {
+        isRunning,
+    } = useExecutionStore();
 
-  const layer = getLayer(activeLayerId);
-  const totalExercises = layer?.exercises.length || 0;
-  const currentExercise = layer?.exercises[activeExerciseIndex];
+    const layer = getLayer(activeLayerId);
+    const totalExercises = layer?.exercises.length || 0;
+    const currentExercise = layer?.exercises[activeExerciseIndex];
 
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  useEffect(() => {
+    useEffect(() => {
     if (practiceMode === "challenge" && challengeStartTime) {
       setElapsedSeconds(Math.floor((Date.now() - challengeStartTime) / 1000));
 
@@ -139,105 +130,62 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
             Playground
           </span>
         )}
-      </div>
+            </div>
 
-      {/* ── Center: Run Button ── */}
-      <div className="flex items-center gap-2">
-        {/* Debug toggle */}
-        <button
-          onClick={toggleDebugger}
-          className={cn(
-            "p-1.5 rounded-md transition-colors",
-            debuggerActive
-              ? "bg-neon-cyan-glow text-neon-cyan"
-              : "hover:bg-neon-cyan-glow text-neon-cyan",
-          )}
-          aria-label="Toggle debugger"
-          title="Toggle Debugger"
-        >
-          <Bug size={14} />
-        </button>
+            {/* ── Center: Run Button ── */}
+            <div className="flex items-center gap-2">
+                {/* Challenge Timer */}
+                {practiceMode === "challenge" && (
+                    <div
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface"
+                        style={{ border: "1px solid var(--color-border)" }}
+                    >
+                        <Timer size={12} style={{ color: "var(--color-neon-cyan)" }} />
+                        <span
+                            className="text-xs font-mono font-medium"
+                            style={{
+                                color:
+                                    elapsedSeconds < 60
+                                        ? "var(--color-success)"
+                                        : "var(--color-warning)",
+                            }}
+                        >
+                            {formatTime(elapsedSeconds)}
+                        </span>
+                    </div>
+                )}
 
-        {/* Debug step controls */}
-        {debuggerActive && (
-          <div className="flex items-center gap-1">
-            <button
-              onClick={stepBackward}
-              disabled={currentStep <= 0}
-              className="p-1.5 rounded-md hover:bg-neon-cyan-glow text-neon-cyan disabled:opacity-30 transition-colors"
-              title="Step Backward"
-            >
-              <ArrowUpFromLine size={13} />
-            </button>
-            <span
-              className="text-[10px] font-mono"
-              style={{ color: "var(--color-text-muted)" }}
-            >
-              {currentStep + 1}/{totalSteps || "—"}
-            </span>
-            <button
-              onClick={stepForward}
-              disabled={currentStep >= totalSteps - 1}
-              className="p-1.5 rounded-md hover:bg-neon-cyan-glow text-neon-cyan disabled:opacity-30 transition-colors"
-              title="Step Forward (F10)"
-            >
-              <ArrowDownToLine size={13} />
-            </button>
-          </div>
-        )}
+                {/* ── Transmute & Run button ── */}
+                <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={onExecute}
+                    disabled={isRunning}
+                    className={cn(
+                        "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
+                        isRunning
+                            ? "opacity-70 cursor-not-allowed"
+                            : "glow-gold-sm hover:glow-gold",
+                    )}
+                    style={{
+                        background:
+                            "linear-gradient(135deg, var(--color-gold-dim), var(--color-gold))",
+                        color: "var(--color-text-inverse)",
+                    }}
+                >
+                    {isRunning ? (
+                        <>
+                            <Square size={14} /> Running...
+                        </>
+                    ) : (
+                        <>
+                            <Wand2 size={14} /> Transmute & Run
+                        </>
+                    )}
+                </motion.button>
+            </div>
 
-        {/* Challenge Timer */}
-        {practiceMode === "challenge" && (
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface"
-            style={{ border: "1px solid var(--color-border)" }}
-          >
-            <Timer size={12} style={{ color: "var(--color-neon-cyan)" }} />
-            <span
-              className="text-xs font-mono font-medium"
-              style={{
-                color:
-                  elapsedSeconds < 60
-                    ? "var(--color-success)"
-                    : "var(--color-warning)",
-              }}
-            >
-              {formatTime(elapsedSeconds)}
-            </span>
-          </div>
-        )}
-
-        {/* ── Transmute & Run button ── */}
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={onExecute}
-          disabled={isRunning}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
-            isRunning
-              ? "opacity-70 cursor-not-allowed"
-              : "glow-gold-sm hover:glow-gold",
-          )}
-          style={{
-            background:
-              "linear-gradient(135deg, var(--color-gold-dim), var(--color-gold))",
-            color: "var(--color-text-inverse)",
-          }}
-        >
-          {isRunning ? (
-            <>
-              <Square size={14} /> Running...
-            </>
-          ) : (
-            <>
-              <Wand2 size={14} /> Transmute & Run
-            </>
-          )}
-        </motion.button>
-      </div>
-
-      {/* ── Right: Hint ── */}
+            {/* ── Right: Hint ── */}
       <div className="flex items-center gap-2">
         {practiceMode === "guided" &&
           currentExercise &&

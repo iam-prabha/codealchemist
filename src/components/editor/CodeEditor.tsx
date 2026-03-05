@@ -9,7 +9,7 @@ import { useCallback, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import Editor, { type OnMount, type OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
-import { useEditorStore, useExecutionStore } from "@/stores";
+import { useEditorStore } from "@/stores";
 import { LANGUAGES } from "@/types";
 import { ALCHEMIST_THEME, THEME_NAME } from "@/lib/editor/alchemist-theme";
 
@@ -56,7 +56,6 @@ interface CodeEditorProps {
 
 export default function CodeEditor({ onExecute, defaultCode }: CodeEditorProps) {
     const { activeLanguage, editorCode, setEditorCode } = useEditorStore();
-    const { breakpoints, toggleBreakpoint } = useExecutionStore();
     const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
     const langConfig = LANGUAGES[activeLanguage];
@@ -95,39 +94,10 @@ export default function CodeEditor({ onExecute, defaultCode }: CodeEditorProps) 
                 run: () => useEditorStore.getState().toggleExample(),
             });
 
-            // F10 → Step Over
-            editor.addAction({
-                id: "codealchemist.stepOver",
-                label: "Step Over",
-                keybindings: [monaco.KeyCode.F10],
-                run: () => useExecutionStore.getState().stepForward(),
-            });
-
-            // F11 → Step Into
-            editor.addAction({
-                id: "codealchemist.stepInto",
-                label: "Step Into",
-                keybindings: [monaco.KeyCode.F11],
-                run: () => useExecutionStore.getState().stepForward(),
-            });
-
-            // Click on gutter → toggle breakpoint
-            editor.onMouseDown((e) => {
-                if (
-                    e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN ||
-                    e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS
-                ) {
-                    const lineNumber = e.target.position?.lineNumber;
-                    if (lineNumber) {
-                        toggleBreakpoint(lineNumber);
-                    }
-                }
-            });
-
             // Focus editor
             editor.focus();
         },
-        [toggleBreakpoint]
+        []
     );
 
     /** Handle code changes */
@@ -139,29 +109,6 @@ export default function CodeEditor({ onExecute, defaultCode }: CodeEditorProps) 
         },
         [activeLanguage, setEditorCode]
     );
-
-    /** Update breakpoint decorations when breakpoints change */
-    useEffect(() => {
-        const editor = editorRef.current;
-        if (!editor) return;
-
-        const decorations = breakpoints.map((line) => ({
-            range: {
-                startLineNumber: line,
-                startColumn: 1,
-                endLineNumber: line,
-                endColumn: 1,
-            },
-            options: {
-                isWholeLine: true,
-                className: "breakpoint-line",
-                glyphMarginClassName: "breakpoint-glyph",
-                glyphMarginHoverMessage: { value: "Click to remove breakpoint" },
-            },
-        }));
-
-        editor.createDecorationsCollection(decorations);
-    }, [breakpoints]);
 
     return (
         <div className="editor-panel relative h-full w-full">

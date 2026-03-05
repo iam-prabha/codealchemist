@@ -46,11 +46,6 @@ export default function OutputPane() {
                 }}
             >
                 <div className="flex items-center gap-2">
-                    <Terminal size={14} style={{ color: "var(--color-text-muted)" }} />
-                    <span className="text-xs font-semibold" style={{ color: "var(--color-text-secondary)" }}>
-                        Output
-                    </span>
-
                     {/* Execution status indicator */}
                     {isRunning && (
                         <motion.div

@@ -110,27 +110,10 @@ interface ExecutionState {
     executionTimeMs: number | null;
     setExecutionTimeMs: (ms: number | null) => void;
 
-    /** Current step index for visualization stepper */
-    currentStep: number;
-    setCurrentStep: (step: number) => void;
-    stepForward: () => void;
-    stepBackward: () => void;
-
-    /** Total steps in the current execution */
-    totalSteps: number;
-    setTotalSteps: (count: number) => void;
-
-    /** Is the debugger active? */
-    debuggerActive: boolean;
-    toggleDebugger: () => void;
-
-    /** Breakpoint line numbers */
-    breakpoints: number[];
-    toggleBreakpoint: (line: number) => void;
-
-    /** Store execution steps for the trace */
-    steps: import("@/types").ExecutionStep[];
-    setSteps: (steps: import("@/types").ExecutionStep[]) => void;
+    /** Terminal drawer visibility */
+    isTerminalOpen: boolean;
+    setTerminalOpen: (isOpen: boolean) => void;
+    toggleTerminal: () => void;
 
     /** Reset execution state */
     resetExecution: () => void;
@@ -149,34 +132,9 @@ export const useExecutionStore = create<ExecutionState>()((set) => ({
     executionTimeMs: null,
     setExecutionTimeMs: (ms) => set({ executionTimeMs: ms }),
 
-    currentStep: 0,
-    setCurrentStep: (step) => set({ currentStep: step }),
-    stepForward: () =>
-        set((s) => ({
-            currentStep: Math.min(s.currentStep + 1, s.totalSteps - 1),
-        })),
-    stepBackward: () =>
-        set((s) => ({
-            currentStep: Math.max(s.currentStep - 1, 0),
-        })),
-
-    totalSteps: 0,
-    setTotalSteps: (count) => set({ totalSteps: count }),
-
-    debuggerActive: false,
-    toggleDebugger: () =>
-        set((s) => ({ debuggerActive: !s.debuggerActive })),
-
-    breakpoints: [],
-    toggleBreakpoint: (line) =>
-        set((s) => ({
-            breakpoints: s.breakpoints.includes(line)
-                ? s.breakpoints.filter((l) => l !== line)
-                : [...s.breakpoints, line],
-        })),
-
-    steps: [],
-    setSteps: (steps) => set({ steps }),
+    isTerminalOpen: false,
+    setTerminalOpen: (isOpen) => set({ isTerminalOpen: isOpen }),
+    toggleTerminal: () => set((s) => ({ isTerminalOpen: !s.isTerminalOpen })),
 
     resetExecution: () =>
         set({
@@ -184,9 +142,6 @@ export const useExecutionStore = create<ExecutionState>()((set) => ({
             output: "",
             error: null,
             executionTimeMs: null,
-            currentStep: 0,
-            totalSteps: 0,
-            steps: [],
         }),
 }));
 

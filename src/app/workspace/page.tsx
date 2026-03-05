@@ -17,7 +17,6 @@ import EditorToolbar from "@/components/editor/EditorToolbar";
 import ExerciseInstructions from "@/components/editor/ExerciseInstructions";
 import GoldenExample from "@/components/editor/GoldenExample";
 import OutputPane from "@/components/editor/OutputPane";
-import VisualizationPanel from "@/components/visualization/VisualizationPanel";
 import ParticleEffect from "@/components/effects/ParticleEffect";
 import { useEditorStore, useExecutionStore, useProgressStore } from "@/stores";
 import { getLayer } from "@/data/curriculum";
@@ -67,10 +66,8 @@ export default function WorkspacePage() {
         setError,
         setExecutionTimeMs,
         resetExecution,
-        debuggerActive,
-        setTotalSteps,
-        setCurrentStep,
-        setSteps,
+        isTerminalOpen,
+        setTerminalOpen,
     } = useExecutionStore();
 
     const { addXp, updateActivity, markCompleted } = useProgressStore();
@@ -108,24 +105,15 @@ export default function WorkspacePage() {
 
         resetExecution();
         setIsRunning(true);
+        setTerminalOpen(true);
 
         try {
-            const result = await executeCode(code, activeLanguage, debuggerActive);
+            const result = await executeCode(code, activeLanguage, false);
 
             setOutput(result.output);
             setError(result.error);
             setExecutionTimeMs(result.executionTimeMs);
             
-            if (result.steps) {
-                setSteps(result.steps);
-                setTotalSteps(result.steps.length);
-                setCurrentStep(0);
-            } else {
-                setSteps([]);
-                setTotalSteps(0);
-                setCurrentStep(0);
-            }
-
             // Award XP for successful execution
             if (result.success && !result.error && practiceMode !== "playground") {
                 addXp(10);
@@ -163,10 +151,7 @@ export default function WorkspacePage() {
         setOutput,
         setError,
         setExecutionTimeMs,
-        debuggerActive,
-        setTotalSteps,
-        setCurrentStep,
-        setSteps,
+        setTerminalOpen,
         addXp,
         updateActivity,
         markCompleted,
@@ -192,49 +177,81 @@ export default function WorkspacePage() {
                 {/* ── Main Content (Resizable Panels) ── */}
                 <main className="app-main flex flex-col h-full w-full min-h-0 bg-[var(--color-void)]">
                     <PanelGroup orientation="horizontal" id="ca-horizontal-panels">
-                            {/* ── Left: Editor & Terminal ── */}
-                            <Panel defaultSize={70} minSize={30} className="flex flex-col h-full">
-                                <PanelGroup orientation="vertical" id="ca-vertical-panels">
-                                    
-                                    {/* Top: Instructions & Golden Example */}
-                                    <Panel defaultSize={20} minSize={10} className="flex flex-col overflow-auto bg-[var(--color-surface)] border-b border-[var(--color-border)]">
-                                        <LanguageTabs />
-                                        <ModeSelector />
+                        
+                        {/* ── Left Half: Instructions & Task View ── */}
+                        <Panel defaultSize={40} minSize={25} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+                            <div className="flex flex-col h-full overflow-hidden">
+                                {/* Task Header / Navigation */}
+                                <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
+                                    <LanguageTabs />
+                                    <ModeSelector />
+                                </div>
+                                
+                                {/* Scrollable Instructions */}
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    <div className="p-4 md:p-6 pb-24">
                                         <ExerciseInstructions />
-                                        {currentExercise && practiceMode === "guided" && <GoldenExample exercise={currentExercise} />}
-                                    </Panel>
-                                    
-                                    <ResizeHandle />
+                                        {currentExercise && practiceMode === "guided" && (
+                                            <div className="mt-8">
+                                                <GoldenExample exercise={currentExercise} />
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </Panel>
 
-                                    {/* Middle: Monaco Editor */}
-                                    <Panel defaultSize={55} minSize={20} className="flex flex-col bg-[var(--color-deep)] relative">
-                                        <EditorToolbar onExecute={handleExecute} />
-                                        <div className="flex-1 min-h-0 w-full relative">
-                                            <CodeEditor
-                                                onExecute={handleExecute}
-                                                defaultCode={currentExercise?.starterCode[activeLanguage] || ""}
-                                            />
-                                        </div>
-                                    </Panel>
-                                    
-                                    <ResizeHandle />
+                        <ResizeHandle vertical />
 
-                                    {/* Bottom: Output / Terminal */}
-                                    <Panel defaultSize={25} minSize={10} className="flex flex-col min-h-0 bg-[var(--color-abyss)] border-t border-[var(--color-border)]">
-                                        <OutputPane />
-                                    </Panel>
+                        {/* ── Right Half: Editor & Terminal ── */}
+                        <Panel defaultSize={60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
+                            {/* Editor Toolbar */}
+                            <div className="shrink-0 z-10">
+                                <EditorToolbar onExecute={handleExecute} />
+                            </div>
 
-                                </PanelGroup>
-                            </Panel>
+                            {/* Monaco Editor Area */}
+                            <div className="flex-1 min-h-0 w-full relative">
+                                <CodeEditor
+                                    onExecute={handleExecute}
+                                    defaultCode={currentExercise?.starterCode[activeLanguage] || ""}
+                                />
+                            </div>
 
-                            <ResizeHandle vertical />
-
-                            {/* ── Right: Visualization Panel ── */}
-                            <Panel defaultSize={30} minSize={15} className="hidden lg:flex flex-col h-full border-l border-[var(--color-border)] bg-[var(--color-abyss)]">
-                                <VisualizationPanel />
-                            </Panel>
-                        </PanelGroup>
-                    </main>
+                            {/* Collapsible Terminal Drawer */}
+                            <motion.div 
+                                initial={false}
+                                animate={{ 
+                                    height: isTerminalOpen ? "30%" : "0px",
+                                    opacity: isTerminalOpen ? 1 : 0,
+                                }}
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                className="absolute bottom-0 left-0 right-0 bg-[var(--color-abyss)] border-t border-[var(--color-border)] z-20 shadow-2xl flex flex-col overflow-hidden"
+                            >
+                                {/* Drawer Handle / Header */}
+                                <div 
+                                    className="flex items-center justify-between px-4 py-2 bg-[var(--color-surface)] border-b border-[var(--color-border)] cursor-pointer select-none"
+                                    onClick={() => setTerminalOpen(!isTerminalOpen)}
+                                >
+                                    <span className="text-xs font-mono font-bold text-[var(--color-text-secondary)]">
+                                        {isRunning ? "Terminal (Running...)" : "Terminal"}
+                                    </span>
+                                    <button 
+                                        className="text-[var(--color-text-muted)] hover:text-white transition-colors"
+                                        aria-label="Close terminal"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                    </button>
+                                </div>
+                                
+                                {/* Output Content */}
+                                <div className="flex-1 overflow-auto min-h-0">
+                                    <OutputPane />
+                                </div>
+                            </motion.div>
+                        </Panel>
+                    </PanelGroup>
+                </main>
             </div>
         </>
     );
