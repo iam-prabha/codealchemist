@@ -5,8 +5,10 @@
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
-    // Tell the client exactly what URL it is operating on so it can formulate correct callback URLs
-    baseURL: process.env.NEXT_PUBLIC_APP_URL || "https://codealchemist-theta.vercel.app",
+    // Hardcode the production URL as a fallback so we don't strictly require a NEXT_PUBLIC env var
+    baseURL: process.env.NODE_ENV === "development" 
+        ? "http://localhost:3000" 
+        : "https://codealchemist-theta.vercel.app",
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;
