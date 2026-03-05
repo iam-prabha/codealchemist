@@ -27,7 +27,7 @@ const features = [
     {
         icon: Zap,
         title: "Transmute Engine",
-        description: "Run your code instantly in the browser with real-time execution and debugging.",
+        description: "Transmute your code instantly in the browser with real-time execution and debugging.",
         color: "text-yellow-400",
     },
     {

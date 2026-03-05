@@ -7,8 +7,6 @@ import EditorPanel from "@/components/editor/EditorPanel";
 import TerminalPanel from "@/components/editor/TerminalPanel";
 import TransmuteButton from "@/components/editor/TransmuteButton";
 import { useEditorStore } from "@/store/useEditorStore";
-import { useUIStore } from "@/store/useUIStore";
-import { cn } from "@/lib/utils";
 
 export default function CodeAlchemistPage() {
     const { activeChapterId, activeLanguage } = useEditorStore();
@@ -50,7 +48,7 @@ export default function CodeAlchemistPage() {
                     <div className="hidden lg:block px-4 py-3 bg-surface border-t border-border">
                         <div className="flex items-center justify-between">
                             <span className="text-xs text-text-muted">
-                                Press [Ctrl+Enter] to transmute & run
+                                Press [Ctrl+Enter] to transmute
                             </span>
                             <div className="w-48">
                                 <TransmuteButton

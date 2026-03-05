@@ -8,7 +8,7 @@ import HintsAccordion from "./HintsAccordion";
 import { BookOpen, Lightbulb } from "lucide-react";
 
 export default function InstructionsPanel() {
-    const { activeChapterId, currentStep, totalSteps, activeLanguage } = useEditorStore();
+    const { activeChapterId, currentStep, totalSteps } = useEditorStore();
     const chapter = getChapter(activeChapterId);
     const exercise = chapter?.exercises[0];
 

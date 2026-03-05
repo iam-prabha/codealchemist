@@ -20,7 +20,7 @@ interface UIState {
     setMobileMenuOpen: (open: boolean) => void;
 }
 
-export const useUIStore = create<UIState>()((set, get) => ({
+export const useUIStore = create<UIState>()((set) => ({
     sidebarOpen: true,
     sidebarExpanded: true,
     terminalOpen: true,

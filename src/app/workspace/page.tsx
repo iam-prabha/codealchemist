@@ -243,7 +243,7 @@ export default function WorkspacePage() {
                                         onClick={() => setTerminalOpen(!isTerminalOpen)}
                                     >
                                         <span className="text-xs font-mono font-bold text-[var(--color-text-secondary)]">
-                                            {isRunning ? "⚡ Running..." : "📟 Terminal"}
+                                            {isRunning ? "⚗️ Transmuting..." : "📟 Terminal"}
                                         </span>
                                         <button 
                                             className="text-[var(--color-text-muted)] hover:text-white transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"

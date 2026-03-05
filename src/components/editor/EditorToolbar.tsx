@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * EditorToolbar — Run button, debug controls, exercise navigation
+ * EditorToolbar — Transmute button, debug controls, exercise navigation
  */
 
 import { motion } from "framer-motion";
@@ -128,12 +128,12 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
             className="text-xs font-medium"
             style={{ color: "var(--color-text-secondary)" }}
           >
-            Playground
+            Forge
           </span>
         )}
             </div>
 
-            {/* ── Center: Run Button ── */}
+            {/* ── Center: Transmute Button ── */}
             <div className="flex items-center gap-1 md:gap-2">
                 {/* Challenge Timer */}
                 {practiceMode === "challenge" && (
@@ -156,7 +156,7 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                     </div>
                 )}
 
-                {/* ── Transmute & Run button ── */}
+                {/* ── Transmute Code button ── */}
                 <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
@@ -176,11 +176,11 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                 >
                     {isRunning ? (
                         <>
-                            <Square size={14} /> <span className="hidden sm:inline">Running...</span>
+                            <Square size={14} /> <span className="hidden sm:inline">Transmuting...</span>
                         </>
                     ) : (
                         <>
-                            <Wand2 size={14} /> <span className="hidden sm:inline">transmute</span>
+                            <Wand2 size={14} /> <span className="hidden sm:inline">Transmute</span>
                         </>
                     )}
                 </motion.button>

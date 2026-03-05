@@ -20,8 +20,8 @@ const steps = [
     {
         icon: Play,
         number: 3,
-        title: "Transmute & Run",
-        description: "Write code, execute it instantly, and see the results. Get AI hints when stuck and track your progress with XP.",
+        title: "Transmute Code",
+        description: "Write code, transmute it instantly, and see the results. Get AI hints when stuck and track your progress with XP.",
     },
 ];
 

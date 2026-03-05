@@ -61,7 +61,7 @@ export default function HeroSection() {
             }, 150);
             return () => clearTimeout(timer);
         }
-    }, [currentWordIndex, shouldReduceMotion]);
+    }, [currentWordIndex, shouldReduceMotion, words]);
 
     useEffect(() => {
         if (shouldReduceMotion) return;
@@ -226,7 +226,7 @@ export default function HeroSection() {
                         <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
                             <div className="flex items-center gap-2 text-xs text-text-muted">
                                 <span>⚡</span>
-                                <span>Press Ctrl+Enter to run</span>
+                                <span>Press Ctrl+Enter to transmute</span>
                             </div>
                             <div className="text-xs text-text-muted">
                                 ✨ AI hints available
