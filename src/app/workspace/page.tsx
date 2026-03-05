@@ -2,7 +2,7 @@
 
 /**
  * CodeAlchemist — Main Application Page
- * Fully responsive: mobile-first drawer, desktop sidebar
+ * User-friendly responsive workspace with vertical panels on mobile
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -152,19 +152,18 @@ export default function WorkspacePage() {
         <>
             <ParticleEffect count={15} />
 
-            {/* Fixed sidebar on mobile, static on desktop */}
             <Sidebar />
-
-            {/* Fixed header */}
             <TopBar />
 
-            {/* Main content area */}
+            {/* Main content: vertical on mobile (stacked), horizontal on desktop (side-by-side) */}
             <main className="flex flex-col h-screen pt-14 lg:pl-[280px] bg-[var(--color-void)]">
                 <div className="flex-1 flex flex-col min-h-0">
+                    
+                    {/* Mobile: vertical stack | Desktop: horizontal split */}
                     <PanelGroup orientation="horizontal" className="flex-1">
                         
-                        {/* Instructions Panel */}
-                        <Panel defaultSize={40} minSize={20} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+                        {/* Instructions Panel - on top for mobile, left for desktop */}
+                        <Panel defaultSize={40} minSize={25} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
                             <div className="flex flex-col h-full overflow-hidden">
                                 <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
                                     <LanguageTabs />
@@ -186,8 +185,8 @@ export default function WorkspacePage() {
 
                         <ResizeHandle />
 
-                        {/* Editor Panel */}
-                        <Panel defaultSize={60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
+                        {/* Editor Panel - on bottom for mobile, right for desktop */}
+                        <Panel defaultSize={60} minSize={35} className="flex flex-col h-full bg-[var(--color-deep)] relative">
                             <div className="shrink-0 z-10">
                                 <EditorToolbar onExecute={handleExecute} />
                             </div>
@@ -199,28 +198,28 @@ export default function WorkspacePage() {
                                 />
                             </div>
 
-                            {/* Terminal Drawer */}
+                            {/* Terminal Drawer - taller on mobile for better usability */}
                             <motion.div 
                                 initial={false}
                                 animate={{ 
-                                    height: isTerminalOpen ? "30%" : "0px",
+                                    height: isTerminalOpen ? "35%" : "0px",
                                     opacity: isTerminalOpen ? 1 : 0,
                                 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
                                 className="absolute bottom-0 left-0 right-0 bg-[var(--color-abyss)] border-t border-[var(--color-border)] z-20 shadow-2xl flex flex-col overflow-hidden"
                             >
                                 <div 
-                                    className="flex items-center justify-between px-3 md:px-4 py-2 bg-[var(--color-surface)] border-b border-[var(--color-border)] cursor-pointer select-none"
+                                    className="flex items-center justify-between px-4 py-3 bg-[var(--color-surface)] border-b border-[var(--color-border)] cursor-pointer select-none"
                                     onClick={() => setTerminalOpen(!isTerminalOpen)}
                                 >
                                     <span className="text-xs font-mono font-bold text-[var(--color-text-secondary)]">
-                                        {isRunning ? "Terminal (Running...)" : "Terminal"}
+                                        {isRunning ? "⚡ Running..." : "📟 Terminal"}
                                     </span>
                                     <button 
-                                        className="text-[var(--color-text-muted)] hover:text-white transition-colors"
+                                        className="text-[var(--color-text-muted)] hover:text-white transition-colors p-1"
                                         aria-label="Toggle terminal"
                                     >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                             <polyline points={isTerminalOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"}></polyline>
                                         </svg>
                                     </button>
