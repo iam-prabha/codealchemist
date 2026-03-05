@@ -26,11 +26,22 @@ export default function Sidebar() {
             
             <aside 
                 className={cn(
-                    "app-sidebar flex flex-col z-50",
+                    "app-sidebar flex flex-col z-50 glass",
                     "fixed inset-y-0 left-0 w-[280px] lg:static lg:w-auto transform transition-transform duration-300 ease-in-out",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
+            {/* ── Mobile Close Button ── */}
+            <button 
+                onClick={toggleSidebar}
+                className="absolute top-3 right-3 p-1 rounded-md lg:hidden hover:bg-[var(--color-surface-hover)] transition-colors"
+                aria-label="Close sidebar"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+            </button>
+
             {/* ── Logo ── */}
             <div className="p-5 border-b border-[var(--color-border)]">
                 <h1 className="text-lg font-bold tracking-tight" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
@@ -73,13 +84,16 @@ export default function Sidebar() {
                             key={layer.id}
                             whileHover={{ x: 4 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => setActiveLayerId(layer.id)}
+                            onClick={() => {
+                                setActiveLayerId(layer.id);
+                                if (window.innerWidth < 1024) toggleSidebar();
+                            }}
                             disabled={!hasContent}
                             className={cn(
                                 "w-full text-left px-4 py-3 flex items-start gap-3 transition-all duration-200 group",
                                 "border-l-2 border-transparent",
                                 isActive && "border-l-[var(--color-gold)] bg-[var(--color-surface)]",
-                                !isActive && hasContent && "hover:bg-[var(--color-surface-hover)]",
+                                !isActive && hasContent && "hover:bg-[var(--color-surface-hover)] hover:border-l-[var(--color-gold)]/30",
                                 !hasContent && "opacity-40 cursor-not-allowed"
                             )}
                         >

@@ -60,14 +60,14 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
 
   return (
     <div
-      className="flex items-center justify-between px-4 py-2 shrink-0"
+      className="flex flex-wrap items-center justify-between gap-2 px-2 md:px-4 py-2 shrink-0"
       style={{
         background: "var(--color-deep)",
         borderBottom: "1px solid var(--color-border)",
       }}
     >
       {/* ── Left: Exercise navigation ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2 min-w-0">
         {practiceMode !== "playground" ? (
           <>
             <button
@@ -82,12 +82,13 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
             </button>
 
             <span
-              className="text-xs font-medium"
+              className="text-xs font-medium truncate max-w-[100px] md:max-w-none"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              {currentExercise?.title || "Exercise"}{" "}
-              <span style={{ color: "var(--color-text-muted)" }}>
-                ({activeExerciseIndex + 1}/{totalExercises})
+              <span className="hidden md:inline">{currentExercise?.title || "Exercise"}</span>
+              <span className="md:hidden">Ex. {activeExerciseIndex + 1}</span>
+              <span style={{ color: "var(--color-text-muted)" }} className="hidden md:inline">
+                {" "}({activeExerciseIndex + 1}/{totalExercises})
               </span>
             </span>
 
@@ -133,7 +134,7 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
             </div>
 
             {/* ── Center: Run Button ── */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
                 {/* Challenge Timer */}
                 {practiceMode === "challenge" && (
                     <div
@@ -162,7 +163,7 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                     onClick={onExecute}
                     disabled={isRunning}
                     className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all",
+                        "flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2 rounded-lg text-xs font-semibold transition-all",
                         isRunning
                             ? "opacity-70 cursor-not-allowed"
                             : "glow-gold-sm hover:glow-gold",
@@ -175,11 +176,11 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                 >
                     {isRunning ? (
                         <>
-                            <Square size={14} /> Running...
+                            <Square size={14} /> <span className="hidden sm:inline">Running...</span>
                         </>
                     ) : (
                         <>
-                            <Wand2 size={14} /> Transmute & Run
+                            <Wand2 size={14} /> <span className="hidden sm:inline">transmute</span>
                         </>
                     )}
                 </motion.button>

@@ -21,6 +21,7 @@ import ParticleEffect from "@/components/effects/ParticleEffect";
 import { useEditorStore, useExecutionStore, useProgressStore } from "@/stores";
 import { getLayer } from "@/data/curriculum";
 import { executeCode } from "@/lib/execution/executor";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 // Dynamically import Monaco editor (no SSR)
 const CodeEditor = dynamic(
@@ -78,6 +79,10 @@ export default function WorkspacePage() {
     // Mounted state to avoid hydration mismatch with react-resizable-panels
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
+
+    // Responsive: vertical panels on mobile/tablet (< 1024px), horizontal on desktop
+    const isMobile = useMediaQuery("(max-width: 1023px)");
+    const panelOrientation = isMobile ? "vertical" : "horizontal";
 
     // ── Load starter code when exercise or language changes ──
     useEffect(() => {
@@ -176,10 +181,14 @@ export default function WorkspacePage() {
 
                 {/* ── Main Content (Resizable Panels) ── */}
                 <main className="app-main flex flex-col h-full w-full min-h-0 bg-[var(--color-void)]">
-                    <PanelGroup orientation="horizontal" id="ca-horizontal-panels">
+                    <PanelGroup 
+                        orientation={panelOrientation} 
+                        id={isMobile ? "ca-vertical-panels" : "ca-horizontal-panels"}
+                        className={isMobile ? "flex-col" : ""}
+                    >
                         
                         {/* ── Left Half: Instructions & Task View ── */}
-                        <Panel defaultSize={40} minSize={25} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+                        <Panel defaultSize={isMobile ? 30 : 40} minSize={20} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
                             <div className="flex flex-col h-full overflow-hidden">
                                 {/* Task Header / Navigation */}
                                 <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
@@ -204,7 +213,7 @@ export default function WorkspacePage() {
                         <ResizeHandle vertical />
 
                         {/* ── Right Half: Editor & Terminal ── */}
-                        <Panel defaultSize={60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
+                        <Panel defaultSize={isMobile ? 70 : 60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
                             {/* Editor Toolbar */}
                             <div className="shrink-0 z-10">
                                 <EditorToolbar onExecute={handleExecute} />
