@@ -2,7 +2,7 @@
 
 /**
  * CodeAlchemist — Main Application Page
- * Fully responsive with Tailwind CSS best practices
+ * Fully responsive: mobile-first drawer, desktop sidebar
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -152,14 +152,18 @@ export default function WorkspacePage() {
         <>
             <ParticleEffect count={15} />
 
-            <div className="flex flex-col lg:grid lg:grid-cols-[280px_1fr] lg:grid-rows-[56px_1fr] h-screen w-full overflow-hidden">
-                <Sidebar />
+            {/* Fixed sidebar on mobile, static on desktop */}
+            <Sidebar />
 
-                <TopBar />
+            {/* Fixed header */}
+            <TopBar />
 
-                <main className="flex flex-col h-full w-full min-h-0 bg-[var(--color-void)] overflow-hidden lg:col-start-2 lg:row-start-2 row-start-1 col-start-1">
-                    <PanelGroup orientation="horizontal" className="h-full w-full">
+            {/* Main content area */}
+            <main className="flex flex-col h-screen pt-14 lg:pl-[280px] bg-[var(--color-void)]">
+                <div className="flex-1 flex flex-col min-h-0">
+                    <PanelGroup orientation="horizontal" className="flex-1">
                         
+                        {/* Instructions Panel */}
                         <Panel defaultSize={40} minSize={20} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
                             <div className="flex flex-col h-full overflow-hidden">
                                 <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
@@ -182,6 +186,7 @@ export default function WorkspacePage() {
 
                         <ResizeHandle />
 
+                        {/* Editor Panel */}
                         <Panel defaultSize={60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
                             <div className="shrink-0 z-10">
                                 <EditorToolbar onExecute={handleExecute} />
@@ -194,6 +199,7 @@ export default function WorkspacePage() {
                                 />
                             </div>
 
+                            {/* Terminal Drawer */}
                             <motion.div 
                                 initial={false}
                                 animate={{ 
@@ -226,8 +232,8 @@ export default function WorkspacePage() {
                             </motion.div>
                         </Panel>
                     </PanelGroup>
-                </main>
-            </div>
+                </div>
+            </main>
         </>
     );
 }
