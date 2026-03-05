@@ -180,15 +180,15 @@ export default function WorkspacePage() {
                 <TopBar />
 
                 {/* ── Main Content (Resizable Panels) ── */}
-                <main className="app-main flex flex-col h-full w-full min-h-0 bg-[var(--color-void)]">
+                <main className="app-main flex flex-col h-full w-full min-h-0 bg-[var(--color-void)] overflow-hidden">
                     <PanelGroup 
                         orientation={panelOrientation} 
                         id={isMobile ? "ca-vertical-panels" : "ca-horizontal-panels"}
-                        className={isMobile ? "flex-col" : ""}
+                        className="h-full w-full"
                     >
                         
                         {/* ── Left Half: Instructions & Task View ── */}
-                        <Panel defaultSize={isMobile ? 30 : 40} minSize={20} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+                        <Panel defaultSize={isMobile ? 35 : 40} minSize={15} className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]">
                             <div className="flex flex-col h-full overflow-hidden">
                                 {/* Task Header / Navigation */}
                                 <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
@@ -210,7 +210,7 @@ export default function WorkspacePage() {
                             </div>
                         </Panel>
 
-                        <ResizeHandle vertical />
+                        <ResizeHandle vertical={panelOrientation === "vertical"} />
 
                         {/* ── Right Half: Editor & Terminal ── */}
                         <Panel defaultSize={isMobile ? 70 : 60} minSize={30} className="flex flex-col h-full bg-[var(--color-deep)] relative">
@@ -231,7 +231,7 @@ export default function WorkspacePage() {
                             <motion.div 
                                 initial={false}
                                 animate={{ 
-                                    height: isTerminalOpen ? "30%" : "0px",
+                                    height: isTerminalOpen ? (isMobile ? "40%" : "30%") : "0px",
                                     opacity: isTerminalOpen ? 1 : 0,
                                 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
