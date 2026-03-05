@@ -13,6 +13,8 @@ import {
     Zap,
     FlaskConical,
     LogIn,
+    PanelLeftClose,
+    PanelLeft,
 } from "lucide-react";
 import { useEditorStore, useProgressStore } from "@/stores";
 import { CURRICULUM_LAYERS } from "@/data/curriculum";
@@ -27,6 +29,7 @@ export default function TopBar() {
         exampleRevealed,
         toggleExample,
         toggleSidebar,
+        sidebarOpen,
     } = useEditorStore();
     const { xp } = useProgressStore();
     const { data: session, isPending } = useSession();
@@ -38,14 +41,29 @@ export default function TopBar() {
     return (
         <>
             <header className="app-topbar gap-2 md:gap-4">
-                {/* -- Mobile menu button -- */}
+                {/* -- Sidebar/Explorer toggle (VS Code style) -- */}
                 <button
                     onClick={toggleSidebar}
-                    className="flex lg:hidden p-2 md:p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center"
-                    aria-label="Toggle sidebar"
+                    className={cn(
+                        "p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center transition-colors",
+                        sidebarOpen ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
+                    )}
+                    aria-label={sidebarOpen ? "Close Explorer" : "Open Explorer"}
+                    title={sidebarOpen ? "Close Explorer (Ctrl+B)" : "Explorer (Ctrl+B)"}
                 >
-                    <Menu size={20} />
+                    {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
                 </button>
+
+                {/* -- Mobile menu button (when sidebar closed on mobile) -- */}
+                {!sidebarOpen && (
+                    <button
+                        onClick={toggleSidebar}
+                        className="flex lg:hidden p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center"
+                        aria-label="Open menu"
+                    >
+                        <Menu size={20} />
+                    </button>
+                )}
 
                 {/* -- Breadcrumb (links back to landing page) -- */}
                 <Link

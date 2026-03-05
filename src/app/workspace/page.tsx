@@ -2,7 +2,7 @@
 
 /**
  * CodeAlchemist — Main Application Page
- * Tab-based mobile layout, large touch targets, resizable panels
+ * VS Code-style workspace with collapsible sidebar, resizable panels
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -52,7 +52,8 @@ export default function WorkspacePage() {
         setEditorCode,
         practiceMode,
         challengeStartTime,
-        resetChallengeTimer
+        resetChallengeTimer,
+        sidebarOpen,
     } = useEditorStore();
 
     const {
@@ -157,7 +158,11 @@ export default function WorkspacePage() {
         <>
             <ParticleEffect count={15} />
 
-            <Sidebar />
+            {/* Sidebar - collapsible */}
+            <AnimatePresence>
+                {sidebarOpen && <Sidebar />}
+            </AnimatePresence>
+
             <TopBar />
 
             {/* Mobile Tab Switcher - only visible on small screens */}
@@ -186,19 +191,22 @@ export default function WorkspacePage() {
                 </button>
             </div>
 
-            {/* Main content */}
-            <main className="flex flex-col h-screen pt-14 lg:pl-[280px] pb-14 lg:pb-0 bg-[var(--color-void)]">
+            {/* Main content - with sidebar offset when open */}
+            <main className={cn(
+                "flex flex-col h-screen pt-14 bg-[var(--color-void)] transition-all duration-300",
+                sidebarOpen ? "lg:pl-[240px]" : "lg:pl-0"
+            )}>
                 <div className="flex-1 flex flex-col min-h-0">
                     
-                    {/* Desktop: horizontal split | Mobile: tab-based */}
+                    {/* Desktop: 3-panel layout | Mobile: tab-based */}
                     <PanelGroup orientation="horizontal" className="flex-1">
                         
                         {/* Instructions Panel - visible on desktop, or mobile when tab selected */}
                         <AnimatePresence mode="wait">
                             {(mobileTab === "instructions" || !mounted || window.innerWidth >= 1024) && (
                                 <Panel 
-                                    defaultSize={40} 
-                                    minSize={25} 
+                                    defaultSize={35} 
+                                    minSize={20} 
                                     className={cn(
                                         "flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]",
                                         "lg:flex", 
@@ -231,8 +239,8 @@ export default function WorkspacePage() {
 
                         {/* Editor Panel - always visible */}
                         <Panel 
-                            defaultSize={60} 
-                            minSize={35} 
+                            defaultSize={65} 
+                            minSize={40} 
                             className={cn(
                                 "flex flex-col h-full bg-[var(--color-deep)] relative",
                                 mobileTab === "instructions" ? "hidden lg:flex" : "flex"
