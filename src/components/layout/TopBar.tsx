@@ -37,14 +37,14 @@ export default function TopBar() {
 
     return (
         <>
-            <header className="app-topbar gap-4">
+            <header className="app-topbar gap-2 md:gap-4">
                 {/* -- Mobile menu button -- */}
                 <button
                     onClick={toggleSidebar}
-                    className="flex lg:hidden p-2 rounded-md hover:bg-[var(--color-surface-hover)] mr-2"
+                    className="flex lg:hidden p-2 md:p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center"
                     aria-label="Toggle sidebar"
                 >
-                    <Menu size={18} />
+                    <Menu size={20} />
                 </button>
 
                 {/* -- Breadcrumb (links back to landing page) -- */}
@@ -54,7 +54,7 @@ export default function TopBar() {
                     title="Back to home"
                 >
                     <span className="text-lg">{activeLayer?.icon || "⚗️"}</span>
-                    <div>
+                    <div className="hidden sm:block">
                         <h2
                             className="text-sm font-semibold leading-tight group-hover:text-[var(--color-gold)] transition-colors"
                             style={{ fontFamily: "Space Grotesk, sans-serif" }}
@@ -73,7 +73,7 @@ export default function TopBar() {
                     whileTap={{ scale: 0.95 }}
                     onClick={toggleExample}
                     className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        "flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                         exampleRevealed
                             ? "bg-[var(--color-gold)] text-[var(--color-text-inverse)]"
                             : "glass glass-hover text-[var(--color-gold)]"
@@ -82,11 +82,11 @@ export default function TopBar() {
                 >
                     {exampleRevealed ? (
                         <>
-                            <EyeOff size={14} /> Hide Example
+                            <EyeOff size={14} /> <span className="hidden md:inline">Hide</span>
                         </>
                     ) : (
                         <>
-                            <FlaskConical size={14} /> Reveal Golden Example
+                            <FlaskConical size={14} /> <span className="hidden md:inline">Reveal</span>
                         </>
                     )}
                 </motion.button>
@@ -115,11 +115,11 @@ export default function TopBar() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setAuthModalOpen(true)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass glass-hover"
+                            className="flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass glass-hover min-h-[36px]"
                             style={{ color: "var(--color-gold)" }}
                         >
                             <LogIn size={14} />
-                            Sign In
+                            <span className="hidden sm:inline">Sign In</span>
                         </motion.button>
                     </>
                 )}

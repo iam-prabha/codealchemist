@@ -75,10 +75,10 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                 setActiveExerciseIndex(Math.max(0, activeExerciseIndex - 1))
               }
               disabled={activeExerciseIndex === 0}
-              className="p-1.5 rounded-md hover:bg-(--color-surface-hover) disabled:opacity-30 transition-colors"
+              className="p-2 md:p-1.5 rounded-md hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
               aria-label="Previous exercise"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={16} className="md:size-14" />
             </button>
 
             <span
@@ -99,10 +99,10 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
                 )
               }
               disabled={activeExerciseIndex >= totalExercises - 1}
-              className="p-1.5 rounded-md hover:bg-(--color-surface-hover) disabled:opacity-30 transition-colors"
+              className="p-2 md:p-1.5 rounded-md hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
               aria-label="Next exercise"
             >
-              <ChevronRight size={14} />
+              <ChevronRight size={16} className="md:size-14" />
             </button>
 
             {/* Difficulty dots */}
@@ -187,16 +187,16 @@ export default function EditorToolbar({ onExecute }: EditorToolbarProps) {
             </div>
 
             {/* ── Right: Hint ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 md:gap-2">
         {practiceMode === "guided" &&
           currentExercise &&
           currentExercise.hints.length > 0 && (
             <button
-              className="text-xs px-2 py-1 rounded-md hover:bg-surface-hover transition-colors"
+              className="text-xs px-3 py-2 md:px-2 md:py-1 rounded-md hover:bg-[var(--color-surface-hover)] transition-colors min-h-[36px] flex items-center"
               style={{ color: "var(--color-text-muted)" }}
               title="Show hint"
             >
-              💡 Hint
+              💡 <span className="hidden md:inline">Hint</span>
             </button>
           )}
       </div>
