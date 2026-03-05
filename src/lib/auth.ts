@@ -14,6 +14,7 @@ export const auth = betterAuth({
 
     baseURL: process.env.BETTER_AUTH_URL,
     trustedOrigins: ["https://codealchemist-theta.vercel.app"],
+    trustHost: true,
 
     emailAndPassword: {
         enabled: true,
