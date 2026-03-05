@@ -1,47 +1,27 @@
 "use client";
 
 /**
- * Sidebar — VS Code-style Explorer Panel
- * Collapsible file/tree navigation for curriculum layers
+ * Sidebar — Concept Layer Navigation
+ * Simple vertical list of layers, hidden by default
  */
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
-    ChevronRight, 
-    ChevronDown, 
-    BookOpen, 
-    CheckCircle2, 
-    Circle,
-    Flame,
-    Code2,
-    Database,
-    Lock,
-    GitBranch,
-    Terminal,
-    Zap,
-    Atom,
-    Sparkles,
-    Blocks,
-    Cpu,
+    ChevronRight,
+    Beaker,
+    Feather,
     Variable,
+    FunctionSquare,
     List,
     Hash,
-    FunctionSquare,
-    Binary,
     TerminalSquare,
     ArrowRightLeft,
     Boxes,
     Layers,
     Puzzle,
-    Beaker,
     Microscope,
-    Feather,
-    FileCode,
-    FileJson,
-    FileText,
-    Folder,
-    FolderOpen
+    Zap,
+    Flame,
 } from "lucide-react";
 import { useEditorStore, useProgressStore } from "@/stores";
 import { CURRICULUM_LAYERS, getLayerCompletion } from "@/data/curriculum";
@@ -62,191 +42,101 @@ const LAYER_ICONS: Record<string, React.ReactNode> = {
     "12": <Microscope className="w-4 h-4" />,
 };
 
-interface TreeItemProps {
-    label: string;
-    icon?: React.ReactNode;
-    isActive?: boolean;
-    isCompleted?: boolean;
-    onClick?: () => void;
-    children?: React.ReactNode;
-    defaultExpanded?: boolean;
-}
-
-function TreeItem({ label, icon, isActive, isCompleted, onClick, children, defaultExpanded = false }: TreeItemProps) {
-    const [expanded, setExpanded] = useState(defaultExpanded);
-    const hasChildren = !!children;
-
-    return (
-        <div>
-            <motion.button
-                whileHover={{ x: 2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => {
-                    if (hasChildren) setExpanded(!expanded);
-                    onClick?.();
-                }}
-                className={cn(
-                    "w-full flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-colors",
-                    isActive 
-                        ? "bg-[var(--color-surface-active)] text-[var(--color-text-primary)]" 
-                        : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text-primary)]"
-                )}
-            >
-                {hasChildren ? (
-                    <span className="w-4 h-4 flex items-center justify-center">
-                        {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                    </span>
-                ) : (
-                    <span className="w-4" />
-                )}
-                
-                {icon && <span className={cn("w-4 h-4", isCompleted ? "text-[var(--color-success)]" : "text-[var(--color-text-muted)]")}>
-                    {isCompleted ? <CheckCircle2 size={14} /> : icon}
-                </span>}
-                
-                <span className="flex-1 text-left truncate text-xs">{label}</span>
-                
-                {isCompleted && !icon && (
-                    <CheckCircle2 size={12} className="text-[var(--color-success)]" />
-                )}
-            </motion.button>
-            
-            <AnimatePresence>
-                {expanded && hasChildren && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="ml-3 border-l border-[var(--color-border)] pl-1"
-                    >
-                        {children}
-                    </motion.div>
-                )}
-            </AnimatePresence>
-        </div>
-    );
-}
-
 export default function Sidebar() {
     const { activeLayerId, setActiveLayerId, sidebarOpen, toggleSidebar } = useEditorStore();
     const { xp, streak, completed } = useProgressStore();
 
-    const totalCompleted = completed.length;
-    const totalExercises = CURRICULUM_LAYERS.reduce((acc, layer) => acc + layer.exercises.length, 0);
-
     return (
-        <>
-            {/* Mobile backdrop */}
-            {sidebarOpen && (
-                <div 
-                    className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
-                    onClick={toggleSidebar}
-                />
+        <aside 
+            className={cn(
+                "fixed inset-y-0 left-0 z-40 w-[220px] flex flex-col",
+                "bg-[var(--color-abyss)] border-r border-[var(--color-border)]",
+                "transform transition-transform duration-300 ease-in-out",
+                sidebarOpen ? "translate-x-0" : "-translate-x-full"
             )}
-            
-            <aside 
-                className={cn(
-                    "flex flex-col z-50",
-                    "fixed inset-y-0 left-0 w-[240px] lg:relative lg:translate-x-0 transition-transform duration-300",
-                    sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-                )}
-                style={{ background: "var(--color-abyss)" }}
-            >
-                {/* ── Explorer Header ── */}
-                <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--color-border)]">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
-                        Explorer
-                    </span>
-                    <div className="flex items-center gap-1">
-                        <button 
-                            onClick={toggleSidebar}
-                            className="p-1 rounded hover:bg-[var(--color-surface-hover)]"
-                            aria-label="Collapse sidebar"
+        >
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-3 border-b border-[var(--color-border)]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                    Layers
+                </span>
+                <button 
+                    onClick={toggleSidebar}
+                    className="p-1 rounded hover:bg-[var(--color-surface-hover)] transition-colors"
+                    aria-label="Close sidebar"
+                >
+                    <ChevronRight size={16} />
+                </button>
+            </div>
+
+            {/* Layer List */}
+            <nav className="flex-1 overflow-y-auto py-2">
+                {CURRICULUM_LAYERS.map((layer) => {
+                    const isActive = layer.id === activeLayerId;
+                    const completion = getLayerCompletion(layer.id, completed);
+                    const hasContent = layer.exercises.length > 0;
+
+                    return (
+                        <motion.button
+                            key={layer.id}
+                            whileHover={{ x: 4 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setActiveLayerId(layer.id)}
+                            disabled={!hasContent}
+                            className={cn(
+                                "w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200",
+                                "border-l-2",
+                                isActive 
+                                    ? "border-l-[var(--color-gold)] bg-[var(--color-surface)] text-[var(--color-text-primary)]"
+                                    : "border-l-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:border-l-[var(--color-gold)]/30",
+                                !hasContent && "opacity-40 cursor-not-allowed"
+                            )}
                         >
-                            <ChevronRight size={14} className={cn("transition-transform", sidebarOpen && "rotate-180")} />
-                        </button>
-                    </div>
-                </div>
+                            {/* Layer Icon */}
+                            <span className={cn(
+                                "w-5 h-5 flex items-center justify-center",
+                                isActive ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
+                            )}>
+                                {LAYER_ICONS[String(layer.id).padStart(2, '0')]}
+                            </span>
 
-                {/* ── CodeAlchemist Section (VS Code style) ── */}
-                <div className="flex flex-col">
-                    <div className="flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] cursor-pointer">
-                        <ChevronRight size={12} />
-                        <span>CODEALCHEMIST</span>
-                    </div>
-                    
-                    <div className="flex flex-col px-1">
-                        {CURRICULUM_LAYERS.map((layer) => {
-                            const isActive = layer.id === activeLayerId;
-                            const completion = getLayerCompletion(layer.id, completed);
-                            const hasContent = layer.exercises.length > 0;
-                            const layerCompleted = completion === 100;
-                            
-                            return (
-                                <TreeItem
-                                    key={layer.id}
-                                    label={layer.title}
-                                    icon={LAYER_ICONS[String(layer.id).padStart(2, '0')]}
-                                    isActive={isActive}
-                                    isCompleted={layerCompleted}
-                                    onClick={() => {
-                                        setActiveLayerId(layer.id);
-                                        if (window.innerWidth < 1024) toggleSidebar();
-                                    }}
-                                    defaultExpanded={isActive}
-                                >
-                                    {layer.exercises.slice(0, 5).map((exercise, idx) => (
-                                        <TreeItem
-                                            key={exercise.id}
-                                            label={`${idx + 1}. ${exercise.title}`}
-                                            isCompleted={completed.includes(exercise.id)}
-                                            onClick={() => {
-                                                setActiveLayerId(layer.id);
-                                                if (window.innerWidth < 1024) toggleSidebar();
-                                            }}
-                                        />
-                                    ))}
-                                    {layer.exercises.length > 5 && (
-                                        <TreeItem
-                                            label={`+${layer.exercises.length - 5} more...`}
-                                            onClick={() => {
-                                                setActiveLayerId(layer.id);
-                                                if (window.innerWidth < 1024) toggleSidebar();
-                                            }}
-                                        />
-                                    )}
-                                </TreeItem>
-                            );
-                        })}
-                    </div>
-                </div>
+                            {/* Layer Number */}
+                            <span className={cn(
+                                "text-[10px] font-mono w-5",
+                                isActive ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
+                            )}>
+                                {String(layer.id).padStart(2, "0")}
+                            </span>
 
-                {/* ── Progress Section ── */}
-                <div className="mt-auto border-t border-[var(--color-border)] p-3">
-                    <div className="flex items-center justify-between text-xs mb-2">
-                        <span className="text-[var(--color-text-muted)]">Progress</span>
-                        <span className="text-[var(--color-gold)]">{totalCompleted}/{totalExercises}</span>
+                            {/* Layer Title */}
+                            <span className="flex-1 text-left truncate text-xs">
+                                {layer.title}
+                            </span>
+
+                            {/* Progress indicator */}
+                            {hasContent && (
+                                <span className="text-[10px] text-[var(--color-text-muted)]">
+                                    {completion}%
+                                </span>
+                            )}
+                        </motion.button>
+                    );
+                })}
+            </nav>
+
+            {/* Footer Stats */}
+            <div className="p-3 border-t border-[var(--color-border)]">
+                <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-1.5">
+                        <Zap size={12} className="text-[var(--color-gold)]" />
+                        <span className="text-[var(--color-gold)]">{xp} XP</span>
                     </div>
-                    <div className="h-1.5 rounded-full bg-[var(--color-surface-active)] overflow-hidden">
-                        <motion.div 
-                            className="h-full rounded-full bg-[var(--color-gold)]"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(totalCompleted / totalExercises) * 100}%` }}
-                        />
-                    </div>
-                    
-                    <div className="flex items-center gap-3 mt-3">
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <Zap size={12} className="text-[var(--color-gold)]" />
-                            <span className="text-[var(--color-gold)]">{xp} XP</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 text-xs">
-                            <Flame size={12} className="text-[var(--color-warning)]" />
-                            <span className="text-[var(--color-warning)]">{streak} day streak</span>
-                        </div>
+                    <div className="flex items-center gap-1.5">
+                        <Flame size={12} className="text-[var(--color-warning)]" />
+                        <span className="text-[var(--color-warning)]">{streak}</span>
                     </div>
                 </div>
-            </aside>
-        </>
+            </div>
+        </aside>
     );
 }

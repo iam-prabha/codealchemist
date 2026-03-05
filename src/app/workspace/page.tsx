@@ -41,8 +41,6 @@ const CodeEditor = dynamic(
     }
 );
 
-type MobileTab = "editor" | "instructions";
-
 export default function WorkspacePage() {
     const {
         activeLayerId,
@@ -73,7 +71,6 @@ export default function WorkspacePage() {
     const currentExercise = layer?.exercises[activeExerciseIndex];
 
     const [mounted, setMounted] = useState(false);
-    const [mobileTab, setMobileTab] = useState<MobileTab>("editor");
 
     useEffect(() => setMounted(true), []);
 
@@ -158,148 +155,115 @@ export default function WorkspacePage() {
         <>
             <ParticleEffect count={15} />
 
-            {/* Sidebar - collapsible */}
+            {/* Sidebar - collapsible on ALL screens */}
             <AnimatePresence>
                 {sidebarOpen && <Sidebar />}
             </AnimatePresence>
 
             <TopBar />
 
-            {/* Mobile Tab Switcher - only visible on small screens */}
-            <div className="fixed bottom-0 left-0 right-0 z-30 lg:hidden bg-[var(--color-surface)] border-t border-[var(--color-border)] flex">
-                <button
-                    onClick={() => setMobileTab("editor")}
-                    className={cn(
-                        "flex-1 py-4 text-sm font-medium transition-colors",
-                        mobileTab === "editor"
-                            ? "text-[var(--color-gold)] border-b-2 border-[var(--color-gold)]"
-                            : "text-[var(--color-text-muted)]"
-                    )}
-                >
-                    ✏️ Editor
-                </button>
-                <button
-                    onClick={() => setMobileTab("instructions")}
-                    className={cn(
-                        "flex-1 py-4 text-sm font-medium transition-colors",
-                        mobileTab === "instructions"
-                            ? "text-[var(--color-gold)] border-b-2 border-[var(--color-gold)]"
-                            : "text-[var(--color-text-muted)]"
-                    )}
-                >
-                    📖 Instructions
-                </button>
-            </div>
-
-            {/* Main content - with sidebar offset when open */}
+            {/* Main content - adjusts based on sidebar */}
             <main className={cn(
                 "flex flex-col h-screen pt-14 bg-[var(--color-void)] transition-all duration-300",
-                sidebarOpen ? "lg:pl-[240px]" : "lg:pl-0"
+                sidebarOpen ? "pl-[220px]" : "pl-0"
             )}>
-                <div className="flex-1 flex flex-col min-h-0">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                     
-                    {/* Desktop: 3-panel layout | Mobile: tab-based */}
+                    {/* Main PanelGroup: Instructions | Editor+Terminal */}
                     <PanelGroup orientation="horizontal" className="flex-1">
                         
-                        {/* Instructions Panel - visible on desktop, or mobile when tab selected */}
-                        <AnimatePresence mode="wait">
-                            {(mobileTab === "instructions" || !mounted || window.innerWidth >= 1024) && (
-                                <Panel 
-                                    defaultSize={35} 
-                                    minSize={20} 
-                                    className={cn(
-                                        "flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]",
-                                        "lg:flex", 
-                                        mobileTab === "instructions" ? "absolute inset-0 z-20 w-full" : "hidden lg:flex"
-                                    )}
-                                >
-                                    <div className="flex flex-col h-full overflow-hidden">
-                                        <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
-                                            <LanguageTabs />
-                                            <ModeSelector />
-                                        </div>
-                                        
-                                        <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                            <div className="p-4 md:p-6 pb-24">
-                                                <ExerciseInstructions />
-                                                {currentExercise && practiceMode === "guided" && (
-                                                    <div className="mt-8">
-                                                        <GoldenExample exercise={currentExercise} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Panel>
-                            )}
-                        </AnimatePresence>
-
-                        {/* Resize Handle - only on desktop */}
-                        <ResizeHandle className="hidden lg:flex" />
-
-                        {/* Editor Panel - always visible */}
+                        {/* Instructions Panel */}
                         <Panel 
-                            defaultSize={65} 
-                            minSize={40} 
-                            className={cn(
-                                "flex flex-col h-full bg-[var(--color-deep)] relative",
-                                mobileTab === "instructions" ? "hidden lg:flex" : "flex"
-                            )}
+                            defaultSize={30} 
+                            minSize={20}
+                            id="instructions"
+                            className="flex flex-col h-full bg-[var(--color-surface)] border-r border-[var(--color-border)]"
                         >
-                            <div className="shrink-0 z-10">
-                                <EditorToolbar onExecute={handleExecute} />
-                            </div>
-
-                            <div className="flex-1 min-h-0 w-full relative">
-                                <CodeEditor
-                                    onExecute={handleExecute}
-                                    defaultCode={currentExercise?.starterCode[activeLanguage] || ""}
-                                />
-                            </div>
-
-                            {/* Terminal Drawer - 20% height */}
-                            <motion.div 
-                                initial={false}
-                                animate={{ 
-                                    height: isTerminalOpen ? "20%" : "0px",
-                                    opacity: isTerminalOpen ? 1 : 0,
-                                }}
-                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="absolute bottom-0 left-0 right-0 bg-[var(--color-abyss)] border-t border-[var(--color-border)] z-20 shadow-2xl flex flex-col overflow-hidden"
-                            >
-                                <div 
-                                    className="flex items-center justify-between px-4 py-3 bg-[var(--color-surface)] border-b border-[var(--color-border)] cursor-pointer select-none min-h-[44px]"
-                                    onClick={() => setTerminalOpen(!isTerminalOpen)}
-                                >
-                                    <span className="text-xs font-mono font-bold text-[var(--color-text-secondary)]">
-                                        {isRunning ? "⚡ Running..." : "📟 Terminal"}
-                                    </span>
-                                    <button 
-                                        className="text-[var(--color-text-muted)] hover:text-white transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
-                                        aria-label="Toggle terminal"
-                                    >
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <polyline points={isTerminalOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"}></polyline>
-                                        </svg>
-                                    </button>
+                            <div className="flex flex-col h-full overflow-hidden">
+                                <div className="shrink-0 z-10 border-b border-[var(--color-border)] shadow-sm">
+                                    <LanguageTabs />
+                                    <ModeSelector />
                                 </div>
                                 
-                                <div className="flex-1 overflow-auto min-h-0">
-                                    <OutputPane />
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    <div className="p-4 md:p-6 pb-24">
+                                        <ExerciseInstructions />
+                                        {currentExercise && practiceMode === "guided" && (
+                                            <div className="mt-8">
+                                                <GoldenExample exercise={currentExercise} />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </motion.div>
+                            </div>
+                        </Panel>
+
+                        {/* Resize Handle between Instructions and Editor */}
+                        <PanelResizeHandle className="w-1 bg-[var(--color-void)] hover:bg-[var(--color-surface-active)] transition-colors cursor-col-resize flex items-center justify-center">
+                            <div className="w-0.5 h-8 rounded-full bg-[var(--color-border)]" />
+                        </PanelResizeHandle>
+
+                        {/* Editor Panel - contains Editor + Terminal */}
+                        <Panel 
+                            defaultSize={70} 
+                            minSize={40}
+                            id="editor-panel"
+                            className="flex flex-col h-full bg-[var(--color-deep)]"
+                        >
+                            {/* Vertical PanelGroup for Editor + Terminal */}
+                            <PanelGroup orientation="vertical" id="editor-terminal" className="flex-1">
+                                
+                                {/* Code Editor */}
+                                <Panel defaultSize={70} minSize={30} id="editor" className="flex flex-col relative">
+                                    <div className="shrink-0 z-10">
+                                        <EditorToolbar onExecute={handleExecute} />
+                                    </div>
+                                    <div className="flex-1 min-h-0 w-full relative">
+                                        <CodeEditor
+                                            onExecute={handleExecute}
+                                            defaultCode={currentExercise?.starterCode[activeLanguage] || ""}
+                                        />
+                                    </div>
+                                </Panel>
+
+                                {/* Resize Handle between Editor and Terminal */}
+                                <PanelResizeHandle className="h-1 bg-[var(--color-void)] hover:bg-[var(--color-surface-active)] transition-colors cursor-row-resize flex items-center justify-center">
+                                    <div className="h-0.5 w-8 rounded-full bg-[var(--color-border)]" />
+                                </PanelResizeHandle>
+
+                                {/* Terminal */}
+                                <Panel 
+                                    defaultSize={30} 
+                                    minSize={15}
+                                    id="terminal"
+                                    className="flex flex-col bg-[var(--color-abyss)]"
+                                >
+                                    <div 
+                                        className="flex items-center justify-between px-4 py-3 bg-[var(--color-surface)] border-b border-[var(--color-border)] cursor-pointer select-none min-h-[44px]"
+                                        onClick={() => setTerminalOpen(!isTerminalOpen)}
+                                    >
+                                        <span className="text-xs font-mono font-bold text-[var(--color-text-secondary)]">
+                                            {isRunning ? "⚡ Running..." : "📟 Terminal"}
+                                        </span>
+                                        <button 
+                                            className="text-[var(--color-text-muted)] hover:text-white transition-colors p-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                                            aria-label="Toggle terminal"
+                                        >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points={isTerminalOpen ? "6 15 12 9 18 15" : "6 9 12 15 18 9"}></polyline>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="flex-1 overflow-auto min-h-0">
+                                        <OutputPane />
+                                    </div>
+                                </Panel>
+                            </PanelGroup>
                         </Panel>
                     </PanelGroup>
                 </div>
             </main>
         </>
-    );
-}
-
-function ResizeHandle({ className }: { className?: string }) {
-    return (
-        <PanelResizeHandle className={cn("flex items-center justify-center transition-colors bg-[var(--color-void)] hover:bg-[var(--color-surface-active)] w-1 cursor-col-resize h-full", className)}>
-            <div className="w-0.5 h-8 rounded-full bg-[var(--color-border)]" />
-        </PanelResizeHandle>
     );
 }

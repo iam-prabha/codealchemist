@@ -85,7 +85,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
     resetChallengeTimer: () => set({ challengeStartTime: Date.now() }),
     clearChallengeTimer: () => set({ challengeStartTime: null }),
 
-    sidebarOpen: true,
+    sidebarOpen: false,
     toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
 }));
 
