@@ -1,14 +1,17 @@
-/**
- * Auth Client — Better Auth React client for client-side auth operations
- */
+"use client"
 
-import { createAuthClient } from "better-auth/react";
+import { createAuthClient } from "better-auth/react"
 
 export const authClient = createAuthClient({
-    // Hardcode the production URL as a fallback so we don't strictly require a NEXT_PUBLIC env var
-    baseURL: process.env.NODE_ENV === "development" 
-        ? "http://localhost:3000" 
-        : "https://codealchemist-theta.vercel.app",
-});
+  // NEXT_PUBLIC_APP_URL must equal the same value as BETTER_AUTH_URL
+  // It exists as NEXT_PUBLIC_ so the browser bundle can access it
+  baseURL: process.env.NEXT_PUBLIC_APP_URL!,
+})
 
-export const { signIn, signUp, signOut, useSession, getSession } = authClient;
+export const {
+  signIn,
+  signUp,
+  signOut,
+  useSession,
+  getSession,
+} = authClient
