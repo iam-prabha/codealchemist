@@ -1,17 +1,23 @@
 @import "tailwindcss";
 
-@theme {
-  --color-void: #0a0612;
-  --color-abyss: #110b20;
-  --color-deep: #1a1030;
-  --color-surface: #221842;
-  --color-surface-hover: #2d2055;
-  --color-surface-active: #382868;
+@import "tailwindcss";
 
-  --color-gold: #f5c542;
+@theme {
+  --color-background: #0D0D1A;
+  --color-surface: #12122A;
+  --color-panel: #16162E;
+  --color-border: #1E1E3F;
+  --color-accent-gold: #F5C518;
+  --color-accent-blue: #4F8EF7;
+  --color-accent-green: #22C55E;
+  --color-accent-purple: #A855F7;
+  --color-text-primary: #E8E8F0;
+  --color-text-muted: #6B6B8A;
+
+  --color-gold: #F5C518;
   --color-gold-dim: #c49b30;
   --color-gold-bright: #ffd966;
-  --color-gold-glow: #f5c54266;
+  --color-gold-glow: #F5C51866;
 
   --color-python: #3776ab;
   --color-python-glow: #3776ab44;
@@ -26,23 +32,24 @@
   --color-neon-cyan-glow: #00f0ff33;
   --color-neon-magenta-glow: #ff00ff33;
 
-  --color-text-primary: #e8e0f0;
   --color-text-secondary: #a89bc2;
-  --color-text-muted: #6b5f82;
   --color-text-inverse: #0a0612;
 
-  --color-border: #2d2055;
-  --color-border-glow: #f5c54233;
+  --color-border-glow: #F5C51833;
 
   --color-success: #39ff14;
   --color-error: #ff3b5c;
   --color-warning: #ffa726;
   --color-info: #00f0ff;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --color-void: #0D0D1A;
+  --color-abyss: #12122A;
+  --color-deep: #16162E;
+  --color-surface-hover: #2d2055;
+  --color-surface-active: #382868;
+
+  --radius-card: 12px;
+  --radius-btn: 9999px;
 }
 
 *,
@@ -58,7 +65,7 @@ html {
 
 body {
   font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
-  background: var(--color-void);
+  background: var(--color-background);
   color: var(--color-text-primary);
   min-height: 100dvh;
   overflow-x: hidden;
@@ -187,18 +194,109 @@ body {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Sidebar layout */
-.app-sidebar {
-  background: var(--color-abyss);
-  border-right: 1px solid var(--color-border);
-  overflow-y: auto;
+/* Dot-grid background pattern */
+.dot-grid {
+  background-image: radial-gradient(circle, var(--color-border) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* TopBar layout */
-.app-topbar {
-  background: var(--color-abyss);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  padding: 0 1.5rem;
+/* Hero glow effect */
+.hero-glow {
+  background: radial-gradient(ellipse 80% 50% at 50% -20%,
+    rgba(168, 85, 247, 0.15), transparent);
 }
+
+/* Glassmorphism */
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Focus visible ring */
+*:focus-visible {
+  outline: 2px solid var(--color-accent-blue);
+  outline-offset: 2px;
+}
+
+/* Accessibility - reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 20px var(--color-gold-glow), 0 0 40px var(--color-gold-glow);
+}
+
+.glow-gold-sm {
+  box-shadow: 0 0 8px var(--color-gold-glow);
+}
+
+.glow-cyan {
+  box-shadow: 0 0 20px var(--color-neon-cyan-glow), 0 0 40px var(--color-neon-cyan-glow);
+}
+
+.glow-python {
+  box-shadow: 0 0 16px var(--color-python-glow);
+}
+
+.glow-rust {
+  box-shadow: 0 0 16px var(--color-rust-glow);
+}
+
+.glow-typescript {
+  box-shadow: 0 0 16px var(--color-typescript-glow);
+}
+
+/* Text glow */
+.text-glow-gold {
+  text-shadow: 0 0 12px var(--color-gold-glow);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 12px var(--color-neon-cyan-glow);
+}
+
+/* Glassmorphism */
+.glass {
+  background: linear-gradient(135deg, rgba(34, 24, 66, 0.8), rgba(26, 16, 48, 0.6));
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+}
+
+.glass-hover:hover {
+  background: linear-gradient(135deg, rgba(45, 32, 85, 0.9), rgba(34, 24, 66, 0.7));
+  border-color: var(--color-border-glow);
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-gold {
+  background: linear-gradient(90deg, var(--color-gold-dim) 0%, var(--color-gold-bright) 50%, var(--color-gold-dim) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px var(--color-gold-glow); }
+  50% { box-shadow: 0 0 24px var(--color-gold-glow), 0 0 48px var(--color-gold-glow); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+

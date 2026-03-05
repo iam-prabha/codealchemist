@@ -127,3 +127,61 @@ export interface Badge {
 
 /** Practice mode type */
 export type PracticeMode = "guided" | "challenge" | "playground";
+
+/** Chapter/Layer interface */
+export interface Chapter {
+    id: string;
+    number: number;
+    title: string;
+    description: string;
+    exercises: Exercise[];
+    progress: number;
+}
+
+/** Step within an exercise */
+export interface Step {
+    id: number;
+    title: string;
+    description: string;
+}
+
+/** User progress per exercise */
+export interface UserProgress {
+    id: string;
+    userId: string;
+    chapterId: string;
+    exerciseId: string;
+    language: Language;
+    completed: boolean;
+    completedAt: string | null;
+}
+
+/** User stats (XP, streak, etc.) */
+export interface UserStats {
+    id: string;
+    userId: string;
+    xp: number;
+    streak: number;
+    lastActivityAt: string | null;
+}
+
+/** Code submission record */
+export interface Submission {
+    id: string;
+    userId: string;
+    exerciseId: string;
+    language: Language;
+    code: string;
+    output: string | null;
+    success: boolean;
+    executionMs: number | null;
+    createdAt: string;
+}
+
+/** Runner API response */
+export interface RunnerResponse {
+    output: string;
+    success: boolean;
+    executionMs: number;
+    error?: string;
+}

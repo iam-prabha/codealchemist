@@ -1,43 +1,67 @@
 "use client";
 
-/**
- * CodeAlchemist — Landing Page
- * Public marketing page at /
- * The editor workspace lives at /workspace
- */
+import { useCallback } from "react";
+import AppShell from "@/components/shell/AppShell";
+import InstructionsPanel from "@/components/panels/InstructionsPanel";
+import EditorPanel from "@/components/editor/EditorPanel";
+import TerminalPanel from "@/components/editor/TerminalPanel";
+import TransmuteButton from "@/components/editor/TransmuteButton";
+import { useEditorStore } from "@/store/useEditorStore";
+import { useUIStore } from "@/store/useUIStore";
+import { cn } from "@/lib/utils";
 
-import { useState } from "react";
-import ParticleEffect from "@/components/effects/ParticleEffect";
-import AuthModal from "@/components/auth/AuthModal";
-import Navbar from "@/components/landing/Navbar";
-import HeroSection from "@/components/landing/HeroSection";
-import LanguageShowcase from "@/components/landing/LanguageShowcase";
-import Features from "@/components/landing/Features";
-import CurriculumRoadmap from "@/components/landing/CurriculumRoadmap";
-import Footer from "@/components/landing/Footer";
+export default function CodeAlchemistPage() {
+    const { activeChapterId, activeLanguage } = useEditorStore();
 
-export default function LandingPage() {
-    const [authModalOpen, setAuthModalOpen] = useState(false);
-
-    const handleGetStarted = () => setAuthModalOpen(true);
+    const handleTransmute = useCallback(() => {
+        // TODO: Implement code execution
+        console.log("Transmuting code...", { activeChapterId, activeLanguage });
+    }, [activeChapterId, activeLanguage]);
 
     return (
-        <>
-            {/* Background particles */}
-            <ParticleEffect count={25} />
+        <AppShell>
+            <div className="h-full grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-0">
+                {/* Instructions Panel - Desktop: left column, Mobile: full width */}
+                <div className="h-full lg:border-r lg:border-border">
+                    <InstructionsPanel />
+                </div>
 
-            {/* Full-width scrollable landing layout */}
-            <div className="relative z-10 min-h-screen">
-                <Navbar />
-                <HeroSection onGetStarted={handleGetStarted} />
-                <LanguageShowcase />
-                <Features />
-                <CurriculumRoadmap />
-                <Footer onGetStarted={handleGetStarted} />
+                {/* Editor Panel - Desktop: right column, Mobile: full width */}
+                <div className="h-full flex flex-col">
+                    {/* Editor */}
+                    <div className="flex-1 min-h-0">
+                        <EditorPanel onExecute={handleTransmute} />
+                    </div>
+
+                    {/* Terminal */}
+                    <div className="shrink-0">
+                        <TerminalPanel />
+                    </div>
+
+                    {/* Mobile Transmute Button - Fixed at bottom */}
+                    <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50">
+                        <TransmuteButton
+                            onClick={handleTransmute}
+                            isLoading={false}
+                        />
+                    </div>
+
+                    {/* Desktop Transmute Button - Bottom of terminal */}
+                    <div className="hidden lg:block px-4 py-3 bg-surface border-t border-border">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs text-text-muted">
+                                Press [Ctrl+Enter] to transmute & run
+                            </span>
+                            <div className="w-48">
+                                <TransmuteButton
+                                    onClick={handleTransmute}
+                                    isLoading={false}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            {/* Auth Modal */}
-            <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-        </>
+        </AppShell>
     );
 }

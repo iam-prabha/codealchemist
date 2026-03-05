@@ -1,16 +1,13 @@
 /**
- * Auth Server — Better Auth instance with Drizzle adapter
+ * Auth Server — Better Auth instance with pg Pool adapter
  * Supports email/password, Google OAuth, and GitHub OAuth
  */
 
 import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@/db";
+import { Pool } from "pg";
 
 export const auth = betterAuth({
-    database: drizzleAdapter(db, {
-        provider: "pg",
-    }),
+    database: new Pool({ connectionString: process.env.DATABASE_URL }),
 
     baseURL: process.env.BETTER_AUTH_URL,
     trustedOrigins: ["https://codealchemist-theta.vercel.app"],
@@ -18,21 +15,24 @@ export const auth = betterAuth({
 
     emailAndPassword: {
         enabled: true,
-    },
-
-    rateLimit: {
-        window: 60, // 60 seconds
-        max: 100, // max 100 requests per window per IP
+        requireEmailVerification: false,
     },
 
     socialProviders: {
         google: {
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         },
         github: {
-            clientId: process.env.GITHUB_CLIENT_ID as string,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+            clientId: process.env.GITHUB_CLIENT_ID!,
+            clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+        },
+    },
+
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 60 * 5,
         },
     },
 
@@ -59,3 +59,5 @@ export const auth = betterAuth({
         },
     },
 });
+
+export type Session = typeof auth.$Infer.Session;

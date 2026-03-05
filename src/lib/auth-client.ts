@@ -11,4 +11,4 @@ export const authClient = createAuthClient({
         : "https://codealchemist-theta.vercel.app",
 });
 
-export const { signIn, signUp, signOut, useSession } = authClient;
+export const { signIn, signUp, signOut, useSession, getSession } = authClient;

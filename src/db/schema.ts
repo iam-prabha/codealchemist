@@ -81,3 +81,44 @@ export const verification = pgTable("verification", {
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
+
+/* ============================================================
+   CodeAlchemist App-Specific Tables
+   ============================================================ */
+
+/** User progress per chapter */
+export const userProgress = pgTable("user_progress", {
+    id: text("id").primaryKey().default("gen_random_uuid()::text"),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    chapterId: text("chapter_id").notNull(),
+    exerciseId: text("exercise_id").notNull(),
+    language: text("language").notNull(),
+    completed: boolean("completed").notNull().default(false),
+    completedAt: timestamp("completed_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/** XP and streak tracking */
+export const userStats = pgTable("user_stats", {
+    id: text("id").primaryKey().default("gen_random_uuid()::text"),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }).unique(),
+    xp: integer("xp").notNull().default(0),
+    streak: integer("streak").notNull().default(0),
+    lastActivityAt: timestamp("last_activity_at"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+    updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+/** Code submissions history */
+export const submission = pgTable("submission", {
+    id: text("id").primaryKey().default("gen_random_uuid()::text"),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    exerciseId: text("exercise_id").notNull(),
+    language: text("language").notNull(),
+    code: text("code").notNull(),
+    output: text("output"),
+    success: boolean("success").notNull().default(false),
+    executionMs: integer("execution_ms"),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+});
