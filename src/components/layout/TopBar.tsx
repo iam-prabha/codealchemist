@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * TopBar — Application header with breadcrumb, practice mode toggle, and auth controls
+ * TopBar — Application header with mode selector, breadcrumb, and auth controls
+ * Height: 52px, Dark panel background with gold accents
  */
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import {
     EyeOff,
     Menu,
@@ -21,130 +22,164 @@ import { CURRICULUM_LAYERS } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth-client";
 import UserMenu from "@/components/auth/UserMenu";
-import AuthModal from "@/components/auth/AuthModal";
+import ModeSelector from "@/components/editor/ModeSelector";
 
 export default function TopBar() {
+    const reduced = useReducedMotion();
     const {
         activeLayerId,
         exampleRevealed,
         toggleExample,
         toggleSidebar,
         sidebarOpen,
+        activeExerciseIndex,
     } = useEditorStore();
-    const { xp } = useProgressStore();
+    const { xp, streak } = useProgressStore();
     const { data: session, isPending } = useSession();
-    const [authModalOpen, setAuthModalOpen] = useState(false);
 
     const activeLayer = CURRICULUM_LAYERS.find((l) => l.id === activeLayerId);
     const isAuthenticated = !!session?.user;
+    const currentStep = activeExerciseIndex + 1;
+    const totalSteps = activeLayer?.exercises.length || 0;
 
     return (
-        <>
-            <header className="app-topbar gap-2 md:gap-4">
-                {/* -- Sidebar/Explorer toggle (VS Code style) -- */}
+        <motion.header
+            initial={!reduced ? { opacity: 0, y: -10 } : undefined}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            className="flex items-center justify-between px-4 h-[52px] shrink-0"
+            style={{
+                background: "var(--color-panel)",
+                borderBottom: "1px solid var(--color-border-dim)",
+                gridArea: "topnav",
+            }}
+        >
+            {/* Left: Sidebar toggle + Logo */}
+            <div className="flex items-center gap-3">
                 <button
                     onClick={toggleSidebar}
                     className={cn(
-                        "p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center transition-colors",
+                        "p-2 rounded-md hover:bg-[var(--color-overlay)] min-w-[40px] min-h-[40px] items-center justify-center transition-colors",
                         sidebarOpen ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
                     )}
                     aria-label={sidebarOpen ? "Close Explorer" : "Open Explorer"}
-                    title={sidebarOpen ? "Close Explorer (Ctrl+B)" : "Explorer (Ctrl+B)"}
                 >
                     {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeft size={18} />}
                 </button>
 
-                {/* -- Mobile menu button (when sidebar closed on mobile) -- */}
-                {!sidebarOpen && (
-                    <button
-                        onClick={toggleSidebar}
-                        className="flex lg:hidden p-2 rounded-md hover:bg-[var(--color-surface-hover)] min-w-[40px] min-h-[40px] items-center justify-center"
-                        aria-label="Open menu"
-                    >
-                        <Menu size={20} />
-                    </button>
-                )}
-
-                {/* -- Breadcrumb (links back to landing page) -- */}
                 <Link
                     href="/"
-                    className="flex items-center gap-2 mr-auto group"
+                    className="flex items-center gap-2 group"
                     title="Back to home"
                 >
-                    <span className="text-lg">{activeLayer?.icon || "⚗️"}</span>
-                    <div className="hidden sm:block">
-                        <h2
-                            className="text-sm font-semibold leading-tight group-hover:text-[var(--color-gold)] transition-colors"
-                            style={{ fontFamily: "Space Grotesk, sans-serif" }}
-                        >
-                            {activeLayer?.title || "CodeAlchemist"}
-                        </h2>
-                        <p className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>
-                            {activeLayer?.subtitle || "Select a lesson"}
-                        </p>
-                    </div>
+                    <span className="text-lg">⚗️</span>
+                    <span
+                        className="font-semibold text-lg tracking-wide hidden sm:block"
+                        style={{ 
+                            fontFamily: "var(--font-cinzel)", 
+                            color: "var(--color-gold)" 
+                        }}
+                    >
+                        CodeAlchemist
+                    </span>
                 </Link>
+            </div>
 
-                {/* -- Toggle Golden Example -- */}
+            {/* Center: Mode Selector */}
+            <div className="hidden md:block">
+                <ModeSelector />
+            </div>
+
+            {/* Right: Breadcrumb + Stats + Auth */}
+            <div className="flex items-center gap-3">
+                {/* Breadcrumb */}
+                <span 
+                    className="text-xs hidden lg:block"
+                    style={{ color: "var(--color-text-muted)" }}
+                >
+                    Layer {String(activeLayerId).padStart(2, "0")} · Formula {currentStep} of {totalSteps}
+                </span>
+
+                {/* Streak */}
+                {streak > 0 && (
+                    <div 
+                        className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-full"
+                        style={{ background: "var(--color-overlay)" }}
+                    >
+                        <span className="text-xs">🔥</span>
+                        <span 
+                            className="text-xs font-medium"
+                            style={{ color: "var(--color-warning)" }}
+                        >
+                            {streak}
+                        </span>
+                    </div>
+                )}
+
+                {/* XP Badge */}
+                <div 
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                    style={{ 
+                        background: "var(--color-gold-subtle)",
+                        border: "1px solid var(--color-gold-dim)"
+                    }}
+                >
+                    <Zap size={14} style={{ color: "var(--color-gold)" }} />
+                    <span 
+                        className="text-xs font-mono font-medium"
+                        style={{ color: "var(--color-gold)" }}
+                    >
+                        {xp} XP
+                    </span>
+                </div>
+
+                {/* Toggle Golden Example */}
                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={!reduced ? { scale: 1.05 } : undefined}
+                    whileTap={!reduced ? { scale: 0.95 } : undefined}
                     onClick={toggleExample}
                     className={cn(
-                        "flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        "hidden sm:flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                         exampleRevealed
                             ? "bg-[var(--color-gold)] text-[var(--color-text-inverse)]"
-                            : "glass glass-hover text-[var(--color-gold)]"
+                            : "glass glass-hover"
                     )}
-                    title="Toggle Golden Example (Cmd+B)"
+                    style={!exampleRevealed ? { color: "var(--color-gold)" } : {}}
                 >
                     {exampleRevealed ? (
                         <>
-                            <EyeOff size={14} /> <span className="hidden md:inline">Hide</span>
+                            <EyeOff size={14} /> 
+                            <span className="hidden md:inline">Hide</span>
                         </>
                     ) : (
                         <>
-                            <FlaskConical size={14} /> <span className="hidden md:inline">Reveal</span>
+                            <FlaskConical size={14} /> 
+                            <span className="hidden md:inline">Reveal</span>
                         </>
                     )}
                 </motion.button>
 
-                {/* -- Auth: UserMenu or Sign In button -- */}
+                {/* Auth */}
                 {isPending ? (
-                    /* Skeleton placeholder while session loads */
                     <div
                         className="w-20 h-8 rounded-lg animate-pulse"
-                        style={{ background: "var(--color-surface)" }}
+                        style={{ background: "var(--color-elevated)" }}
                     />
                 ) : isAuthenticated ? (
                     <UserMenu />
                 ) : (
-                    <>
-                        {/* XP Badge (unauthenticated — show local XP) */}
-                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass">
-                            <Zap size={14} style={{ color: "var(--color-gold)" }} />
-                            <span className="text-xs font-mono" style={{ color: "var(--color-gold)" }}>
-                                {xp}
-                            </span>
-                        </div>
-
-                        {/* Sign In button */}
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setAuthModalOpen(true)}
-                            className="flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-lg text-xs font-medium transition-all glass glass-hover min-h-[36px]"
-                            style={{ color: "var(--color-gold)" }}
-                        >
-                            <LogIn size={14} />
-                            <span className="hidden sm:inline">Sign In</span>
-                        </motion.button>
-                    </>
+                    <motion.button
+                        whileHover={!reduced ? { scale: 1.05 } : undefined}
+                        whileTap={!reduced ? { scale: 0.95 } : undefined}
+                        onClick={() => window.location.href = "/sign-in"}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium glass glass-hover"
+                        style={{ color: "var(--color-gold)" }}
+                    >
+                        <LogIn size={14} />
+                        <span className="hidden sm:inline">Sign In</span>
+                    </motion.button>
                 )}
-            </header>
-
-            {/* Auth Modal */}
-            <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
-        </>
+            </div>
+        </motion.header>
     );
 }

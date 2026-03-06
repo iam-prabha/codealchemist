@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useEditorStore } from "@/stores";
+import { getLayer } from "@/data/curriculum";
 
 interface StepNavigatorProps {
     currentStep: number;
@@ -15,7 +16,21 @@ export default function StepNavigator({
     totalSteps,
     title,
 }: StepNavigatorProps) {
-    const { nextStep, prevStep } = useEditorStore();
+    const { activeLayerId, activeExerciseIndex, setActiveExerciseIndex } = useEditorStore();
+    const layer = getLayer(activeLayerId);
+    const maxSteps = layer?.exercises.length || 1;
+
+    const nextStep = () => {
+        if (activeExerciseIndex < maxSteps - 1) {
+            setActiveExerciseIndex(activeExerciseIndex + 1);
+        }
+    };
+
+    const prevStep = () => {
+        if (activeExerciseIndex > 0) {
+            setActiveExerciseIndex(activeExerciseIndex - 1);
+        }
+    };
 
     return (
         <div className="flex items-center justify-between px-4 py-3 bg-surface">

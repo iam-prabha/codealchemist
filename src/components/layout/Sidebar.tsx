@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Sidebar — Concept Layer Navigation
- * Simple vertical list of layers, hidden by default
+ * Sidebar — Layer Navigation
+ * Shows curriculum layers with progress tracking
  */
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { 
     ChevronRight,
     Beaker,
@@ -22,10 +22,12 @@ import {
     Microscope,
     Zap,
     Flame,
+    Check,
 } from "lucide-react";
 import { useEditorStore, useProgressStore } from "@/stores";
 import { CURRICULUM_LAYERS, getLayerCompletion } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 const LAYER_ICONS: Record<string, React.ReactNode> = {
     "01": <Beaker className="w-4 h-4" />,
@@ -43,99 +45,154 @@ const LAYER_ICONS: Record<string, React.ReactNode> = {
 };
 
 export default function Sidebar() {
-    const { activeLayerId, setActiveLayerId, sidebarOpen, toggleSidebar } = useEditorStore();
+    const reduced = useReducedMotion();
+    const { activeLayerId, setActiveLayerId, sidebarOpen } = useEditorStore();
     const { xp, streak, completed } = useProgressStore();
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    const toggleExpand = () => setIsExpanded(!isExpanded);
 
     return (
-        <aside 
-            className={cn(
-                "fixed inset-y-0 left-0 z-40 w-[220px] flex flex-col",
-                "bg-[var(--color-abyss)] border-r border-[var(--color-border)]",
-                "transform transition-transform duration-300 ease-in-out",
-                sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            )}
-        >
+        <aside className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-3 border-b border-[var(--color-border)]">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+            <div 
+                className="flex items-center justify-between px-3 py-3 cursor-pointer"
+                style={{ borderBottom: "1px solid var(--color-border-dim)" }}
+                onClick={toggleExpand}
+            >
+                <span 
+                    className="text-[10px] font-semibold uppercase tracking-widest"
+                    style={{ color: "var(--color-text-muted)" }}
+                >
                     Layers
                 </span>
-                <button 
-                    onClick={toggleSidebar}
-                    className="p-1 rounded hover:bg-[var(--color-surface-hover)] transition-colors"
-                    aria-label="Close sidebar"
+                <motion.button
+                    whileHover={!reduced ? { scale: 1.1 } : undefined}
+                    whileTap={!reduced ? { scale: 0.9 } : undefined}
+                    className="p-1 rounded hover:bg-[var(--color-overlay)] transition-colors"
+                    aria-label={isExpanded ? "Collapse" : "Expand"}
                 >
-                    <ChevronRight size={16} />
-                </button>
+                    <motion.div
+                        animate={{ rotate: isExpanded ? 0 : -90 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <ChevronRight size={14} style={{ color: "var(--color-text-muted)" }} />
+                    </motion.div>
+                </motion.button>
             </div>
 
             {/* Layer List */}
-            <nav className="flex-1 overflow-y-auto py-2">
-                {CURRICULUM_LAYERS.map((layer) => {
-                    const isActive = layer.id === activeLayerId;
-                    const completion = getLayerCompletion(layer.id, completed);
-                    const hasContent = layer.exercises.length > 0;
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.nav
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex-1 overflow-y-auto py-2"
+                    >
+                        {CURRICULUM_LAYERS.map((layer) => {
+                            const isActive = layer.id === activeLayerId;
+                            const completion = getLayerCompletion(layer.id, completed);
+                            const hasContent = layer.exercises.length > 0;
+                            const isCompleted = completion === 100;
 
-                    return (
-                        <motion.button
-                            key={layer.id}
-                            whileHover={{ x: 4 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => setActiveLayerId(layer.id)}
-                            disabled={!hasContent}
-                            className={cn(
-                                "w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200",
-                                "border-l-2",
-                                isActive 
-                                    ? "border-l-[var(--color-gold)] bg-[var(--color-surface)] text-[var(--color-text-primary)]"
-                                    : "border-l-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:border-l-[var(--color-gold)]/30",
-                                !hasContent && "opacity-40 cursor-not-allowed"
-                            )}
-                        >
-                            {/* Layer Icon */}
-                            <span className={cn(
-                                "w-5 h-5 flex items-center justify-center",
-                                isActive ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
-                            )}>
-                                {LAYER_ICONS[String(layer.id).padStart(2, '0')]}
-                            </span>
+                            return (
+                                <motion.button
+                                    key={layer.id}
+                                    whileHover={!reduced ? { x: 3 } : undefined}
+                                    whileTap={!reduced ? { scale: 0.98 } : undefined}
+                                    onClick={() => hasContent && setActiveLayerId(layer.id)}
+                                    disabled={!hasContent}
+                                    className={cn(
+                                        "w-full flex items-center gap-2 px-3 py-2.5 text-sm transition-all duration-200",
+                                        isActive ? "border-l-2" : "border-l-2 border-l-transparent"
+                                    )}
+                                    style={{
+                                        background: isActive ? "var(--color-gold-subtle)" : "transparent",
+                                        borderColor: isActive ? "var(--color-gold)" : "transparent",
+                                        color: isActive 
+                                            ? "var(--color-text-primary)" 
+                                            : hasContent 
+                                            ? "var(--color-text-secondary)" 
+                                            : "var(--color-text-muted)",
+                                        opacity: hasContent ? 1 : 0.4,
+                                        cursor: hasContent ? "pointer" : "not-allowed",
+                                    }}
+                                >
+                                    {/* Completion check or number */}
+                                    <span 
+                                        className="w-4 h-4 flex items-center justify-center text-[10px]"
+                                        style={{
+                                            color: isCompleted 
+                                                ? "var(--color-success)" 
+                                                : isActive 
+                                                ? "var(--color-gold)" 
+                                                : "var(--color-text-muted)",
+                                        }}
+                                    >
+                                        {isCompleted ? (
+                                            <Check size={12} />
+                                        ) : (
+                                            String(layer.id).padStart(2, "0")
+                                        )}
+                                    </span>
 
-                            {/* Layer Number */}
-                            <span className={cn(
-                                "text-[10px] font-mono w-5",
-                                isActive ? "text-[var(--color-gold)]" : "text-[var(--color-text-muted)]"
-                            )}>
-                                {String(layer.id).padStart(2, "0")}
-                            </span>
+                                    {/* Layer Icon */}
+                                    <span 
+                                        className="w-4 h-4 flex items-center justify-center"
+                                        style={{
+                                            color: isActive 
+                                                ? "var(--color-gold)" 
+                                                : "var(--color-text-muted)",
+                                        }}
+                                    >
+                                        {LAYER_ICONS[String(layer.id).padStart(2, '0')]}
+                                    </span>
 
-                            {/* Layer Title */}
-                            <span className="flex-1 text-left truncate text-xs">
-                                {layer.title}
-                            </span>
+                                    {/* Layer Title */}
+                                    <span className="flex-1 text-left truncate text-xs">
+                                        {layer.title}
+                                    </span>
 
-                            {/* Progress indicator */}
-                            {hasContent && (
-                                <span className="text-[10px] text-[var(--color-text-muted)]">
-                                    {completion}%
-                                </span>
-                            )}
-                        </motion.button>
-                    );
-                })}
-            </nav>
+                                    {/* Progress */}
+                                    {hasContent && (
+                                        <span 
+                                            className="text-[10px]"
+                                            style={{ 
+                                                color: completion === 100 
+                                                    ? "var(--color-success)" 
+                                                    : "var(--color-text-muted)" 
+                                            }}
+                                        >
+                                            {completion}%
+                                        </span>
+                                    )}
+                                </motion.button>
+                            );
+                        })}
+                    </motion.nav>
+                )}
+            </AnimatePresence>
 
             {/* Footer Stats */}
-            <div className="p-3 border-t border-[var(--color-border)]">
-                <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                        <Zap size={12} className="text-[var(--color-gold)]" />
-                        <span className="text-[var(--color-gold)]">{xp} XP</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                        <Flame size={12} className="text-[var(--color-warning)]" />
-                        <span className="text-[var(--color-warning)]">{streak}</span>
-                    </div>
+            <div 
+                className="p-3 border-t space-y-2"
+                style={{ borderColor: "var(--color-border-dim)" }}
+            >
+                {/* XP */}
+                <div className="flex items-center gap-2 text-xs">
+                    <Zap size={12} style={{ color: "var(--color-gold)" }} />
+                    <span style={{ color: "var(--color-gold)" }}>{xp} XP</span>
                 </div>
+                
+                {/* Streak */}
+                {streak > 0 && (
+                    <div className="flex items-center gap-2 text-xs">
+                        <Flame size={12} style={{ color: "var(--color-warning)" }} />
+                        <span style={{ color: "var(--color-warning)" }}>{streak} day streak</span>
+                    </div>
+                )}
             </div>
         </aside>
     );

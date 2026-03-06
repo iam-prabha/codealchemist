@@ -1,65 +1,34 @@
-"use client";
+// src/app/page.tsx
+import MarketingNav from "@/components/marketing/MarketingNav"
+import HeroSection from "@/components/marketing/HeroSection"
+import LanguagesSection from "@/components/marketing/LanguagesSection"
+import FeaturesSection from "@/components/marketing/FeaturesSection"
+import HowItWorksSection from "@/components/marketing/HowItWorksSection"
+import StatsSection from "@/components/marketing/StatsSection"
+import TestimonialsSection from "@/components/marketing/TestimonialsSection"
+import PricingSection from "@/components/marketing/PricingSection"
+import FAQSection from "@/components/marketing/FAQSection"
+import CTABannerSection from "@/components/marketing/CTABannerSection"
+import MarketingFooter from "@/components/marketing/MarketingFooter"
+import ParticleEffect from "@/components/effects/ParticleEffect"
 
-import { useCallback } from "react";
-import AppShell from "@/components/shell/AppShell";
-import InstructionsPanel from "@/components/panels/InstructionsPanel";
-import EditorPanel from "@/components/editor/EditorPanel";
-import TerminalPanel from "@/components/editor/TerminalPanel";
-import TransmuteButton from "@/components/editor/TransmuteButton";
-import { useEditorStore } from "@/store/useEditorStore";
-
-export default function CodeAlchemistPage() {
-    const { activeChapterId, activeLanguage } = useEditorStore();
-
-    const handleTransmute = useCallback(() => {
-        // TODO: Implement code execution
-        console.log("Transmuting code...", { activeChapterId, activeLanguage });
-    }, [activeChapterId, activeLanguage]);
-
-    return (
-        <AppShell>
-            <div className="h-full grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-0">
-                {/* Instructions Panel - Desktop: left column, Mobile: full width */}
-                <div className="h-full lg:border-r lg:border-border">
-                    <InstructionsPanel />
-                </div>
-
-                {/* Editor Panel - Desktop: right column, Mobile: full width */}
-                <div className="h-full flex flex-col">
-                    {/* Editor */}
-                    <div className="flex-1 min-h-0">
-                        <EditorPanel onExecute={handleTransmute} />
-                    </div>
-
-                    {/* Terminal */}
-                    <div className="shrink-0">
-                        <TerminalPanel />
-                    </div>
-
-                    {/* Mobile Transmute Button - Fixed at bottom */}
-                    <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50">
-                        <TransmuteButton
-                            onClick={handleTransmute}
-                            isLoading={false}
-                        />
-                    </div>
-
-                    {/* Desktop Transmute Button - Bottom of terminal */}
-                    <div className="hidden lg:block px-4 py-3 bg-surface border-t border-border">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs text-text-muted">
-                                Press [Ctrl+Enter] to transmute
-                            </span>
-                            <div className="w-48">
-                                <TransmuteButton
-                                    onClick={handleTransmute}
-                                    isLoading={false}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </AppShell>
-    );
+export default async function LandingPage() {
+  return (
+    <>
+      <ParticleEffect count={25} />
+      <div className="relative z-10 min-h-screen">
+        <MarketingNav />
+        <HeroSection />
+        <LanguagesSection />
+        <FeaturesSection />
+        <HowItWorksSection />
+        <StatsSection />
+        <TestimonialsSection />
+        <PricingSection />
+        <FAQSection />
+        <CTABannerSection />
+        <MarketingFooter />
+      </div>
+    </>
+  )
 }

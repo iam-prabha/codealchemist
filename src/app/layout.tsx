@@ -1,18 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Cinzel, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 // ── Google Fonts (Optimized by Next.js) ────────────────────────
-const spaceGrotesk = Space_Grotesk({
-    subsets: ["latin"],
-    display: "swap",
-    variable: "--font-space",
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  variable: "--font-cinzel",
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
-    subsets: ["latin"],
-    display: "swap",
-    variable: "--font-mono",
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +41,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: "#0a0612",
+    themeColor: "#05050F",
     width: "device-width",
     initialScale: 1,
 };
@@ -46,7 +53,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en" className="dark">
-            <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
+            <body className={`${cinzel.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}>
                 {children}
             </body>
         </html>

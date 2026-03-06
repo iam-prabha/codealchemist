@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import Editor, { type OnMount, type OnChange } from "@monaco-editor/react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { useEditorStore } from "@/stores";
-import { LANGUAGES } from "@/types";
+import { LANGUAGES, type Language } from "@/types";
 import { ALCHEMIST_THEME, THEME_NAME } from "@/lib/editor/alchemist-theme";
 
 /** Default editor options for all languages */
@@ -48,18 +48,21 @@ const EDITOR_OPTIONS: MonacoEditor.IStandaloneEditorConstructionOptions = {
 };
 
 interface CodeEditorProps {
+    /** Override language - when provided, uses this instead of activeLanguage */
+    language?: Language;
     /** Execute callback — called when user presses Cmd+Enter */
     onExecute: () => void;
     /** Initial code to load (from lesson) */
     defaultCode?: string;
 }
 
-export default function CodeEditor({ onExecute, defaultCode }: CodeEditorProps) {
+export default function CodeEditor({ language: languageOverride, onExecute, defaultCode }: CodeEditorProps) {
     const { activeLanguage, editorCode, setEditorCode } = useEditorStore();
     const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
 
-    const langConfig = LANGUAGES[activeLanguage];
-    const currentCode = editorCode[activeLanguage] || defaultCode || "";
+    const effectiveLanguage = languageOverride ?? activeLanguage;
+    const langConfig = LANGUAGES[effectiveLanguage];
+    const currentCode = editorCode[effectiveLanguage] || defaultCode || "";
 
     /** Store latest onExecute callback in a ref to avoid stale closures in Monaco keybindings */
     const onExecuteRef = useRef(onExecute);
@@ -104,10 +107,10 @@ export default function CodeEditor({ onExecute, defaultCode }: CodeEditorProps) 
     const handleChange: OnChange = useCallback(
         (value) => {
             if (value !== undefined) {
-                setEditorCode(activeLanguage, value);
+                setEditorCode(effectiveLanguage, value);
             }
         },
-        [activeLanguage, setEditorCode]
+        [effectiveLanguage, setEditorCode]
     );
 
     return (

@@ -41,6 +41,7 @@ interface EditorState {
     /** Sidebar collapsed on mobile */
     sidebarOpen: boolean;
     toggleSidebar: () => void;
+    setSidebarOpen: (open: boolean) => void;
 }
 
 export const useEditorStore = create<EditorState>()((set) => ({
@@ -87,6 +88,7 @@ export const useEditorStore = create<EditorState>()((set) => ({
 
     sidebarOpen: false,
     toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+    setSidebarOpen: (open) => set({ sidebarOpen: open }),
 }));
 
 /* ============================================================
