@@ -1,183 +1,127 @@
-"use client";
+"use client"
 
-/**
- * CodeEditor — Monaco editor wrapper with language-aware config
- * Handles theme, keybindings, and syncs with Zustand store
- */
+import { useCallback, useRef, useEffect } from "react"
+import { motion } from "framer-motion"
+import Editor, { type OnMount, type OnChange } from "@monaco-editor/react"
+import type { editor as MonacoEditor } from "monaco-editor"
+import { useEditorStore, useExecutionStore } from "@/stores"
+import { type Language } from "@/types"
+import { ALCHEMIST_THEME, THEME_NAME } from "@/lib/editor/alchemist-theme"
 
-import { useCallback, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
-import Editor, { type OnMount, type OnChange } from "@monaco-editor/react";
-import type { editor as MonacoEditor } from "monaco-editor";
-import { useEditorStore } from "@/stores";
-import { LANGUAGES, type Language } from "@/types";
-import { ALCHEMIST_THEME, THEME_NAME } from "@/lib/editor/alchemist-theme";
-
-/** Default editor options for all languages */
-const EDITOR_OPTIONS: MonacoEditor.IStandaloneEditorConstructionOptions = {
-    fontSize: 14,
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
-    fontLigatures: true,
-    lineHeight: 1.6,
-    padding: { top: 16, bottom: 16 },
-    minimap: { enabled: false },
-    scrollBeyondLastLine: false,
-    wordWrap: "on",
-    tabSize: 2,
-    insertSpaces: true,
-    renderWhitespace: "selection",
-    smoothScrolling: true,
-    cursorBlinking: "smooth",
-    cursorSmoothCaretAnimation: "on",
-    bracketPairColorization: { enabled: true },
-    guides: {
-        bracketPairs: true,
-        indentation: true,
-    },
-    suggest: {
-        showMethods: true,
-        showFunctions: true,
-        showVariables: true,
-        showWords: true,
-    },
-    quickSuggestions: {
-        other: true,
-        comments: false,
-        strings: false,
-    },
-};
-
-interface CodeEditorProps {
-    /** Override language - when provided, uses this instead of activeLanguage */
-    language?: Language;
-    /** Execute callback — called when user presses Cmd+Enter */
-    onExecute: () => void;
-    /** Initial code to load (from lesson) */
-    defaultCode?: string;
+const LANGUAGE_COLORS: Record<Language, string> = {
+  python: "var(--color-python)",
+  rust: "var(--color-rust)",
+  typescript: "var(--color-typescript)",
 }
 
-export default function CodeEditor({ language: languageOverride, onExecute, defaultCode }: CodeEditorProps) {
-    const { activeLanguage, editorCode, setEditorCode } = useEditorStore();
-    const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
+const LANGUAGE_MAP: Record<Language, string> = {
+  python: "python",
+  rust: "rust",
+  typescript: "typescript",
+}
 
-    const effectiveLanguage = languageOverride ?? activeLanguage;
-    const langConfig = LANGUAGES[effectiveLanguage];
-    const currentCode = editorCode[effectiveLanguage] || defaultCode || "";
+const EDITOR_OPTIONS: MonacoEditor.IStandaloneEditorConstructionOptions = {
+  fontSize: 13,
+  fontFamily: "var(--font-mono), 'JetBrains Mono', monospace",
+  fontLigatures: true,
+  lineHeight: 22,
+  padding: { top: 16, bottom: 16 },
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  wordWrap: "on",
+  tabSize: 2,
+  insertSpaces: true,
+  smoothScrolling: true,
+  cursorBlinking: "smooth",
+  cursorSmoothCaretAnimation: "on",
+  bracketPairColorization: { enabled: true },
+  guides: { bracketPairs: true, indentation: true },
+  scrollbar: { vertical: "auto", horizontal: "auto" },
+  glyphMargin: false,
+  folding: false,
+  lineDecorationsWidth: 8,
+  lineNumbersMinChars: 3,
+  renderLineHighlight: "gutter",
+}
 
-    /** Store latest onExecute callback in a ref to avoid stale closures in Monaco keybindings */
-    const onExecuteRef = useRef(onExecute);
-    useEffect(() => {
-        onExecuteRef.current = onExecute;
-    }, [onExecute]);
+interface CodeEditorProps {
+  language: Language
+  onExecute: () => void
+}
 
-    /** Handle editor mount — register theme and keybindings */
-    const handleMount: OnMount = useCallback(
-        (editor, monaco) => {
-            editorRef.current = editor;
+export default function CodeEditor({ language, onExecute }: CodeEditorProps) {
+  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null)
 
-            // Register alchemical theme
-            monaco.editor.defineTheme(THEME_NAME, ALCHEMIST_THEME);
-            monaco.editor.setTheme(THEME_NAME);
+  const { editorCode, setEditorCode } = useEditorStore()
+  const { isRunning } = useExecutionStore()
 
-            // ── Keybindings ──
+  const value = editorCode[language] ?? ""
+  const borderColor = LANGUAGE_COLORS[language]
 
-            // Cmd/Ctrl + Enter → Transmute & Run
-            editor.addAction({
-                id: "codealchemist.run",
-                label: "Transmute & Run",
-                keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-                run: () => onExecuteRef.current(),
-            });
+  const onExecuteRef = useRef(onExecute)
+  useEffect(() => {
+    onExecuteRef.current = onExecute
+  }, [onExecute])
 
-            // Cmd/Ctrl + B → Toggle Golden Example
-            editor.addAction({
-                id: "codealchemist.toggleExample",
-                label: "Toggle Golden Example",
-                keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB],
-                run: () => useEditorStore.getState().toggleExample(),
-            });
+  const handleMount: OnMount = useCallback((editor, monaco) => {
+    editorRef.current = editor
+    monaco.editor.defineTheme(THEME_NAME, ALCHEMIST_THEME)
+    monaco.editor.setTheme(THEME_NAME)
 
-            // Focus editor
-            editor.focus();
-        },
-        []
-    );
+    editor.addAction({
+      id: "codealchemist.run",
+      label: "Transmute & Run",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => onExecuteRef.current(),
+    })
 
-    /** Handle code changes */
-    const handleChange: OnChange = useCallback(
-        (value) => {
-            if (value !== undefined) {
-                setEditorCode(effectiveLanguage, value);
-            }
-        },
-        [effectiveLanguage, setEditorCode]
-    );
+    editor.addAction({
+      id: "codealchemist.toggleExample",
+      label: "Toggle Golden Example",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyB],
+      run: () => useEditorStore.getState().toggleExample(),
+    })
 
-    return (
-        <div className="editor-panel relative h-full w-full">
-            {/* ── Language indicator dot ── */}
-            <div
-                className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono"
-                style={{
-                    background: langConfig.color + "22",
-                    color: langConfig.color,
-                    border: `1px solid ${langConfig.color}33`,
-                }}
+    editor.focus()
+  }, [])
+
+  const handleChange: OnChange = useCallback(
+    (val) => {
+      if (val !== undefined) {
+        setEditorCode(language, val)
+      }
+    },
+    [language, setEditorCode]
+  )
+
+  return (
+    <div
+      className="h-full w-full relative overflow-hidden"
+      style={{
+        borderLeft: `2px solid ${borderColor}`,
+        transition: "border-color 0.2s ease",
+      }}
+    >
+      <Editor
+        height="100%"
+        language={LANGUAGE_MAP[language]}
+        value={value}
+        theme={THEME_NAME}
+        options={{ ...EDITOR_OPTIONS, readOnly: isRunning }}
+        onMount={handleMount}
+        onChange={handleChange}
+        loading={
+          <div className="flex items-center justify-center h-full w-full" style={{ background: "var(--color-surface)" }}>
+            <motion.div
+              animate={{ opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ color: "var(--color-text-muted)" }}
             >
-                <span
-                    className="w-1.5 h-1.5 rounded-full"
-                    style={{ background: langConfig.color }}
-                />
-                {langConfig.label}
-            </div>
-
-            <Editor
-                height="100%"
-                language={langConfig.monacoLang}
-                value={currentCode}
-                theme={THEME_NAME}
-                options={EDITOR_OPTIONS}
-                onMount={handleMount}
-                onChange={handleChange}
-                loading={
-                    <div className="flex flex-col items-center justify-center h-full gap-3 bg-[var(--color-deep)] text-[var(--color-text-muted)]">
-                        <div className="flex gap-1">
-                            {[0, 1, 2].map((i) => (
-                                <motion.div
-                                    key={i}
-                                    className="w-2 h-2 rounded-full"
-                                    style={{ background: "var(--color-gold-dim)" }}
-                                    animate={{
-                                        y: [0, -6, 0],
-                                        opacity: [0.3, 1, 0.3],
-                                    }}
-                                    transition={{
-                                        duration: 0.8,
-                                        repeat: Infinity,
-                                        delay: i * 0.15,
-                                    }}
-                                />
-                            ))}
-                        </div>
-                        <span className="text-xs font-mono">Summoning editor...</span>
-                    </div>
-                }
-            />
-
-            {/* ── Breakpoint glyph styles (injected) ── */}
-            <style jsx global>{`
-        .breakpoint-line {
-          background: rgba(255, 59, 92, 0.1) !important;
+              ⚗️ Summoning editor...
+            </motion.div>
+          </div>
         }
-        .breakpoint-glyph {
-          background: #ff3b5c;
-          border-radius: 50%;
-          width: 10px !important;
-          height: 10px !important;
-          margin-left: 4px;
-          margin-top: 5px;
-        }
-      `}</style>
-        </div>
-    );
+      />
+    </div>
+  )
 }

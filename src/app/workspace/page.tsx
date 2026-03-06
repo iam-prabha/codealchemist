@@ -13,8 +13,8 @@ export default async function WorkspacePage() {
   }
 
   return <WorkspaceClient 
-    initialLayerId={1} 
-    initialExerciseIndex={0} 
-    initialLanguage="python"
+    _initialLayerId={1} 
+    _initialExerciseIndex={0} 
+    _initialLanguage="python"
   />
 }

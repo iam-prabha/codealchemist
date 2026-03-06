@@ -9,9 +9,7 @@ import { executeCode } from "@/lib/execution/executor"
 
 import Sidebar from "@/components/layout/Sidebar"
 import TopBar from "@/components/layout/TopBar"
-import TransmuteButton from "@/components/editor/TransmuteButton"
-import TerminalPanel from "@/components/editor/TerminalPanel"
-import InstructionsPanel from "@/components/panels/InstructionsPanel"
+import MobileActionBar from "@/components/editor/MobileActionBar"
 
 const EditorPanel = dynamic(
     () => import("@/components/editor/EditorPanel"),
@@ -22,10 +20,9 @@ const EditorPanel = dynamic(
                 <motion.div
                     animate={{ opacity: [0.3, 1, 0.3] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
-                    className="text-sm"
                     style={{ color: "var(--color-text-muted)" }}
                 >
-                    ⚗️ Loading editors...
+                    ⚗️ Loading editor...
                 </motion.div>
             </div>
         ),
@@ -33,15 +30,15 @@ const EditorPanel = dynamic(
 )
 
 interface WorkspaceClientProps {
-    initialLayerId: number
-    initialExerciseIndex: number
-    initialLanguage: "python" | "rust" | "typescript"
+    _initialLayerId: number
+    _initialExerciseIndex: number
+    _initialLanguage: "python" | "rust" | "typescript"
 }
 
 export default function WorkspaceClient({
-    initialLayerId,
-    initialExerciseIndex,
-    initialLanguage,
+    _initialLayerId,
+    _initialExerciseIndex,
+    _initialLanguage,
 }: WorkspaceClientProps) {
     const {
         activeLayerId,
@@ -158,7 +155,7 @@ export default function WorkspaceClient({
             style={{
                 display: "grid",
                 gridTemplateRows: "52px 1fr",
-                gridTemplateColumns: sidebarOpen ? "220px 380px 1fr" : "0px 0px 1fr",
+                gridTemplateColumns: sidebarOpen ? "220px 320px 1fr" : "0px 0px 1fr",
                 gridTemplateAreas: `
                     "topnav topnav topnav"
                     "sidebar instruct editors"
@@ -193,14 +190,27 @@ export default function WorkspaceClient({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: 0.05 }}
-                className="overflow-hidden"
+                className="overflow-hidden hidden md:block"
                 style={{ 
                     gridArea: "instruct",
                     background: "var(--color-surface)",
                     borderRight: "1px solid var(--color-border-dim)",
                 }}
             >
-                <InstructionsPanel />
+                <EditorPanel onExecute={handleTransmute} />
+            </motion.div>
+
+            <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="flex flex-col min-h-0 overflow-hidden md:hidden"
+                style={{ 
+                    gridArea: "editors",
+                    background: "var(--color-surface)",
+                }}
+            >
+                <EditorPanel onExecute={handleTransmute} />
             </motion.div>
 
             <motion.div
@@ -213,34 +223,10 @@ export default function WorkspaceClient({
                     background: "var(--color-surface)",
                 }}
             >
-                <div 
-                    className="shrink-0 flex items-center justify-between px-4 h-12"
-                    style={{
-                        background: "var(--color-panel)",
-                        borderBottom: "1px solid var(--color-border-dim)",
-                    }}
-                >
-                    <div className="flex items-center gap-2">
-                        <span 
-                            className="text-sm font-medium"
-                            style={{ 
-                                color: "var(--color-text-secondary)",
-                                fontFamily: "var(--font-cinzel)" 
-                            }}
-                        >
-                            🐍 Python &nbsp; 🦀 Rust &nbsp; 🔷 TypeScript
-                        </span>
-                    </div>
-                    
-                    <TransmuteButton onClick={handleTransmute} isLoading={isRunning} />
-                </div>
-
-                <div className="flex-1 min-h-0">
-                    <EditorPanel onExecute={handleTransmute} />
-                </div>
-
-                <TerminalPanel />
+                <EditorPanel onExecute={handleTransmute} />
             </motion.div>
+
+            <MobileActionBar onTransmute={handleTransmute} />
         </div>
     )
 }
