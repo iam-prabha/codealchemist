@@ -1,15 +1,19 @@
 import { betterAuth } from "better-auth"
-import { Pool } from "pg"
+import { drizzleAdapter } from "better-auth/adapters/drizzle"
+import { db } from "@/db"
+import * as schema from "@/db/schema"
 
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }, // required for Supabase
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
+    },
   }),
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: false,
-  },
+  emailAndPassword: { enabled: true },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -21,16 +25,10 @@ export const auth = betterAuth({
     },
   },
   session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5,
-    },
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   trustedOrigins: [
     process.env.BETTER_AUTH_URL!,
     "http://localhost:3000",
   ],
 })
-
-export type Session = typeof auth.$Infer.Session
-export type User = typeof auth.$Infer.Session.user
