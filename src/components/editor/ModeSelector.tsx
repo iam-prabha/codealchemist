@@ -50,8 +50,6 @@ export default function ModeSelector() {
         }
     };
 
-    const activeIndex = MODES.findIndex((m) => m.id === practiceMode);
-
     return (
         <div
             className="flex items-center rounded-full p-0.5"
@@ -60,7 +58,7 @@ export default function ModeSelector() {
                 border: "1px solid var(--color-border-dim)",
             }}
         >
-            {MODES.map((mode, index) => {
+            {MODES.map((mode) => {
                 const isActive = practiceMode === mode.id;
                 const Icon = mode.icon;
 

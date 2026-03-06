@@ -62,8 +62,6 @@ export default function EditorPanel({ onExecute }: EditorPanelProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const activeIndex = LANGUAGES.findIndex((l) => l.id === activeLanguage);
-
   return (
     <div
       className="h-full w-full flex flex-col overflow-hidden"

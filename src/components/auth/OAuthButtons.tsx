@@ -37,7 +37,7 @@ export default function OAuthButtons() {
             setLoadingProvider(provider);
             await signIn.social({
                 provider,
-                callbackURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+                callbackURL: "/dashboard",
             });
         } catch (error) {
             console.error(`${provider} sign in failed:`, error);

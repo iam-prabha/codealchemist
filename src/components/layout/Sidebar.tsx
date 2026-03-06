@@ -46,7 +46,7 @@ const LAYER_ICONS: Record<string, React.ReactNode> = {
 
 export default function Sidebar() {
     const reduced = useReducedMotion();
-    const { activeLayerId, setActiveLayerId, sidebarOpen } = useEditorStore();
+    const { activeLayerId, setActiveLayerId } = useEditorStore();
     const { xp, streak, completed } = useProgressStore();
     const [isExpanded, setIsExpanded] = useState(true);
 

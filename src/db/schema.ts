@@ -5,7 +5,7 @@
 
 import {
   pgTable, text, boolean,
-  timestamp, integer, unique
+  timestamp, integer
 } from "drizzle-orm/pg-core"
 
 // ── Better Auth tables (Drizzle owns these now) ──

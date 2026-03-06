@@ -5,12 +5,10 @@
  * Height: 52px, Dark panel background with gold accents
  */
 
-import { useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
     EyeOff,
-    Menu,
     Zap,
     FlaskConical,
     LogIn,
