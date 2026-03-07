@@ -15,8 +15,12 @@ interface MobileActionBarProps {
 }
 
 export default function MobileActionBar({ onTransmute }: MobileActionBarProps) {
-  const { activeLanguage, setActiveLanguage } = useEditorStore()
+  const { activeLanguage, setActiveLanguage, mobileView, setMobileView } = useEditorStore()
   const { isRunning } = useExecutionStore()
+
+  const toggleInstructions = () => {
+    setMobileView(mobileView === "editor" ? "instructions" : "editor")
+  }
 
   return (
     <div
@@ -52,7 +56,25 @@ export default function MobileActionBar({ onTransmute }: MobileActionBarProps) {
         })}
       </div>
 
-      <TransmuteButton onClick={onTransmute} isLoading={isRunning} />
+      <div className="flex items-center gap-2">
+        <button
+          onClick={toggleInstructions}
+          className="flex items-center justify-center w-10 h-8 rounded-md text-base transition-all duration-150"
+          style={{
+            background: mobileView === "instructions"
+              ? "color-mix(in srgb, var(--color-accent) 20%, transparent)"
+              : "transparent",
+            border: mobileView === "instructions"
+              ? "1px solid color-mix(in srgb, var(--color-accent) 40%, transparent)"
+              : "1px solid transparent",
+          }}
+          title="Toggle Instructions"
+        >
+          📖
+        </button>
+
+        <TransmuteButton onClick={onTransmute} isLoading={isRunning} />
+      </div>
     </div>
   )
 }

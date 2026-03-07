@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Cinzel, DM_Sans, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 
-const spaceGrotesk = Space_Grotesk({
+const cinzel = Cinzel({
     subsets: ["latin"],
+    variable: "--font-cinzel",
+    weight: ["400", "600", "700"],
     display: "swap",
-    variable: "--font-space",
+});
+
+const dmSans = DM_Sans({
+    subsets: ["latin"],
+    variable: "--font-dm-sans",
+    display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
     subsets: ["latin"],
-    display: "swap",
     variable: "--font-mono",
+    display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +33,7 @@ export default function AuthLayout({
 }) {
     return (
         <html lang="en" className="dark">
-            <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
+            <body className={`${cinzel.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
                 <div className="min-h-screen bg-background text-text-primary flex items-center justify-center p-4">
                     {/* Background pattern */}
                     <div className="fixed inset-0 dot-grid opacity-20" />

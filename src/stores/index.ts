@@ -42,6 +42,10 @@ interface EditorState {
     sidebarOpen: boolean;
     toggleSidebar: () => void;
     setSidebarOpen: (open: boolean) => void;
+
+    /** Mobile view state */
+    mobileView: "editor" | "instructions";
+    setMobileView: (view: "editor" | "instructions") => void;
 }
 
 export const useEditorStore = create<EditorState>()((set) => ({
@@ -89,6 +93,9 @@ export const useEditorStore = create<EditorState>()((set) => ({
     sidebarOpen: false,
     toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
     setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
+    mobileView: "editor",
+    setMobileView: (view) => set({ mobileView: view }),
 }));
 
 /* ============================================================

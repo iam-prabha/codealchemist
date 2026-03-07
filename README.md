@@ -8,59 +8,146 @@
 
 ---
 
-## 🚀 Quick Start (Bun Required)
+## ✨ Features
+
+- **Multi-Language Editor** — Write code in Python, Rust, or TypeScript with a premium sliding pill tab switcher
+- **Golden Examples** — Toggleable reference solutions that reveal the "perfect" answer after you solve each exercise
+- **Real-Time Execution** — Run your code instantly with our custom runner API
+- **Visual Debugging** — Watch variables change and call stack evolve in real-time
+- **Progress Tracking** — Earn XP, maintain streaks, and unlock badges as you master each language
+- **Responsive Design** — Seamless experience on desktop and mobile with view toggling
+- **Authentication** — Secure sign-in with Google or GitHub OAuth
+- **Dashboard** — Track your learning progress, mastery percentages, and achievements
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Bun** v1.1+ (required)
+- **PostgreSQL** database (local or hosted)
+
+### Setup
 
 ```bash
 # 1. Install Bun (if not already installed)
 curl -fsSL https://bun.sh/install | bash
 
-# 2. Install dependencies
+# 2. Clone and install dependencies
 bun install
 
-# 3. Start development server
+# 3. Copy environment variables
+cp .env.local.example .env.local
+
+# 4. Configure your .env.local
+# - Set BETTER_AUTH_SECRET (generate with: openssl rand -base64 32)
+# - Configure OAuth credentials (Google/GitHub)
+# - Set DATABASE_URL (PostgreSQL)
+
+# 5. Set up the database
+bun run db:push
+
+# 6. Start development server
 bun run dev
 
-# 4. Open in browser
+# 7. Open in browser
 open http://localhost:3000
 ```
 
-> ⚠️ **Bun is required** — this project will not run on plain Node.js. All scripts, API routes, and execution are optimized for Bun.
+> ⚠️ **Bun is required** — this project uses Bun for all scripts, API routes, and execution. It will not run on plain Node.js.
 
 ---
 
-## 🏗️ Architecture
+## 📋 Environment Variables
+
+| Variable | Description |
+|---|---|
+| `BETTER_AUTH_SECRET` | Secret key for Better Auth (generate with `openssl rand -base64 32`) |
+| `BETTER_AUTH_URL` | Base URL for auth (e.g., `http://localhost:3000`) |
+| `NEXT_PUBLIC_APP_URL` | Public app URL |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `GITHUB_CLIENT_ID` | GitHub OAuth client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth client secret |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `RUNNER_API_URL` | URL for code execution runner API |
+| `RUNNER_AUTH_TOKEN` | Auth token for runner API |
+
+---
+
+## 🏗️ Project Structure
 
 ```
 codealchemist/
 ├── src/
 │   ├── app/                    # Next.js 15 App Router
-│   │   ├── layout.tsx          # Root layout (fonts, metadata)
-│   │   ├── page.tsx            # Main application page
-│   │   ├── globals.css         # Alchemical design system
-│   │   └── api/
-│   │       └── execute/ts/     # TypeScript execution endpoint
+│   │   ├── (auth)/            # Auth route group (sign-in, sign-up)
+│   │   │   ├── layout.tsx     # Auth layout with fonts
+│   │   │   ├── sign-in/       # Sign in page
+│   │   │   └── sign-up/       # Sign up page
+│   │   ├── api/               # API routes
+│   │   │   ├── auth/          # Better Auth endpoints
+│   │   │   ├── execute/      # Code execution
+│   │   │   ├── run/           # Run code
+│   │   │   └── stats/         # User stats
+│   │   ├── dashboard/         # User dashboard
+│   │   ├── workspace/        # Main editor workspace
+│   │   ├── layout.tsx         # Root layout (fonts, metadata)
+│   │   ├── page.tsx           # Landing page
+│   │   └── globals.css        # Tailwind + CSS variables
+│   │
 │   ├── components/
-│   │   ├── layout/             # Sidebar, TopBar
-│   │   ├── editor/             # CodeEditor, GoldenExample, OutputPane
-│   │   ├── visualization/      # VisualizationPanel (variables, call stack)
-│   │   └── effects/            # ParticleEffect
-│   ├── data/
-│   │   └── curriculum.ts       # 12 lesson layers + exercises
+│   │   ├── auth/              # Auth components (providers, buttons)
+│   │   ├── dashboard/         # Dashboard UI components
+│   │   ├── editor/            # Monaco editor, language switcher, action bar
+│   │   ├── effects/           # Particle effects
+│   │   ├── landing/           # Landing page sections
+│   │   ├── layout/            # Sidebar, TopBar
+│   │   ├── marketing/         # Hero, Features, Pricing, FAQ, etc.
+│   │   ├── panels/            # Instructions, Output, Visualization panels
+│   │   └── workspace/         # Workspace-specific components
+│   │
+│   ├── db/
+│   │   ├── index.ts           # Database connection (Drizzle)
+│   │   └── schema.ts          # Table definitions
+│   │
+│   ├── hooks/                 # Custom React hooks
+│   │
 │   ├── lib/
-│   │   ├── editor/             # Monaco theme + keybindings
-│   │   ├── execution/          # Multi-language executor
-│   │   └── utils.ts            # Tailwind merge utility
+│   │   ├── editor/            # Monaco theme, keybindings
+│   │   ├── execution/         # Multi-language executor
+│   │   └── utils.ts           # Utilities
+│   │
 │   ├── stores/
-│   │   └── index.ts            # Zustand stores (editor, execution, progress)
+│   │   └── index.ts           # Zustand stores (editor, execution, progress)
+│   │
+│   ├── data/
+│   │   └── curriculum.ts     # Lesson layers + exercises
+│   │
 │   └── types/
-│       └── index.ts            # TypeScript type definitions
+│       └── index.ts           # TypeScript definitions
+│
 ├── public/                     # Static assets, PWA manifest
-├── package.json                # Bun scripts
-├── bunfig.toml                 # Bun configuration
-├── next.config.ts              # Next.js configuration
-├── tsconfig.json               # TypeScript strict config
-└── SKILL.md                    # Development best practices
+├── .env.local.example         # Environment template
+├── package.json               # Bun scripts
+├── next.config.ts             # Next.js configuration
+├── tsconfig.json              # TypeScript strict config
+└── drizzle.config.ts          # Drizzle ORM config
 ```
+
+---
+
+## 📚 Available Scripts
+
+| Command | Description |
+|---|---|
+| `bun run dev` | Start development server |
+| `bun run build` | Build for production |
+| `bun run start` | Start production server |
+| `bun run lint` | Run ESLint |
+| `bun run db:push` | Push database schema |
+| `bun run db:studio` | Open Drizzle Studio |
 
 ---
 
@@ -88,8 +175,6 @@ codealchemist/
 |---|---|
 | `Ctrl/Cmd + Enter` | Transmute & Run |
 | `Ctrl/Cmd + B` | Toggle Golden Example |
-| `F10` | Step Over (debug) |
-| `F11` | Step Into (debug) |
 
 ---
 
@@ -97,7 +182,7 @@ codealchemist/
 
 1. ⚗️ Variables & Immutability
 2. 🧪 Primitive & Compound Data Types
-3. 🔀 **Control Flow & Pattern Matching** *(fully implemented)*
+3. 🔀 Control Flow & Pattern Matching
 4. 🔮 Functions & Closures
 5. 🔗 Ownership & References
 6. 📚 Collections & Iterators
@@ -110,44 +195,56 @@ codealchemist/
 
 ---
 
-## 🔧 Execution Engines
+## 🗄️ Database
 
-| Language | Engine | Environment |
-|---|---|---|
-| **Python, Rust, TS** | Custom Docker Runner | Server-side (Koyeb / Render / AWS) |
+The project uses **Drizzle ORM** with **PostgreSQL**. The schema includes:
+
+- `users` — User accounts (managed by Better Auth)
+- `userStats` — XP, streak, total exercises completed
+- `userProgress` — Per-layer, per-language mastery percentages
+- `submissions` — Code submission history
+
+Run `bun run db:push` after modifying `src/db/schema.ts`.
 
 ---
 
 ## 🚢 Deployment
 
-CodeAlchemist uses a split-deployment model for security and performance.
+### Deploy to Vercel (Recommended)
 
-### 1. Deploy Frontend (Vercel)
-Deploy the main Next.js repository to Vercel. Ensure you provide the `DATABASE_URL` (using the Transaction Pooler port 6543) and all OAuth credentials.
+1. Push your code to GitHub
+2. Import project in Vercel
+3. Configure environment variables
+4. Deploy
 
-### 2. Deploy Custom Runner (Koyeb / Render)
-The execution engine must run in a Docker container to provide the necessary compilers (Python, Rust, Node).
-1. Connect Koyeb or Render to this repository.
-2. Set the build directory to `scripts/runner`.
-3. Set an environment variable `AUTH_TOKEN` with a secure password.
-4. Deploy the Docker container.
+### Environment Variables (Production)
 
-### 3. Link them together
-Add the Koyeb/Render URL to your Vercel Environment Variables as `RUNNER_API_URL` and the secret password as `RUNNER_AUTH_TOKEN`. Redeploy Vercel.
+```
+BETTER_AUTH_URL=https://your-domain.com
+NEXT_PUBLIC_APP_URL=https://your-domain.com
+DATABASE_URL=postgresql://... (use Transaction Pooler port 6543)
+```
+
+### Code Execution
+
+For security, code execution runs in a separate service. Configure:
+- `RUNNER_API_URL` — Your execution service URL
+- `RUNNER_AUTH_TOKEN` — Secret token for authentication
 
 ---
 
 ## 📋 Tech Stack
 
 - **Runtime:** Bun v1.1+
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 15 (App Router, Turbopack)
 - **Language:** TypeScript (strict mode)
-- **Styling:** Tailwind CSS v4
-- **Editor:** Monaco (@monaco-editor/react)
-- **Animation:** Framer Motion 12
-- **State:** Zustand 5
+- **Styling:** Tailwind CSS v4 + CSS Variables
+- **Database:** PostgreSQL + Drizzle ORM
+- **Auth:** Better Auth
+- **Editor:** Monaco Editor
+- **Animation:** Framer Motion
+- **State:** Zustand
 - **Icons:** Lucide React
-- **UI Primitives:** Radix UI
 
 ---
 

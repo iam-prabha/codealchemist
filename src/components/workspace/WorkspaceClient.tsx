@@ -9,6 +9,7 @@ import { executeCode } from "@/lib/execution/executor"
 
 import Sidebar from "@/components/layout/Sidebar"
 import TopBar from "@/components/layout/TopBar"
+import InstructionsPanel from "@/components/panels/InstructionsPanel"
 import MobileActionBar from "@/components/editor/MobileActionBar"
 
 const EditorPanel = dynamic(
@@ -50,6 +51,8 @@ export default function WorkspaceClient({
         challengeStartTime,
         resetChallengeTimer,
         sidebarOpen,
+        mobileView,
+        setMobileView,
     } = useEditorStore()
 
     const {
@@ -163,10 +166,12 @@ export default function WorkspaceClient({
                 background: "var(--color-void)",
             }}
         >
-            <div style={{ gridArea: "topnav" }}>
+            {/* TopNav */}
+            <div style={{ gridArea: "topnav", overflow: "hidden" }}>
                 <TopBar />
             </div>
 
+            {/* Sidebar */}
             <AnimatePresence>
                 {sidebarOpen && (
                     <motion.div
@@ -186,6 +191,7 @@ export default function WorkspaceClient({
                 )}
             </AnimatePresence>
 
+            {/* Desktop: Instructions Panel (md+) */}
             <motion.div
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -197,14 +203,15 @@ export default function WorkspaceClient({
                     borderRight: "1px solid var(--color-border-dim)",
                 }}
             >
-                <EditorPanel onExecute={handleTransmute} />
+                <InstructionsPanel />
             </motion.div>
 
+            {/* Desktop: Editor Panel (md+) */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: 0.1 }}
-                className="flex flex-col min-h-0 overflow-hidden md:hidden"
+                className="flex flex-col min-h-0 overflow-hidden hidden md:flex"
                 style={{ 
                     gridArea: "editors",
                     background: "var(--color-surface)",
@@ -213,18 +220,62 @@ export default function WorkspaceClient({
                 <EditorPanel onExecute={handleTransmute} />
             </motion.div>
 
-            <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="flex flex-col min-h-0 overflow-hidden"
-                style={{ 
-                    gridArea: "editors",
-                    background: "var(--color-surface)",
-                }}
-            >
-                <EditorPanel onExecute={handleTransmute} />
-            </motion.div>
+            {/* Mobile: Editor or Instructions (mobile only) */}
+            <div className="md:hidden" style={{ gridArea: "editors" }}>
+                <AnimatePresence mode="wait">
+                    {mobileView === "editor" ? (
+                        <motion.div
+                            key="editor"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex flex-col h-full"
+                        >
+                            <EditorPanel onExecute={handleTransmute} />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="instructions"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex flex-col h-full"
+                        >
+                            {/* Back button strip */}
+                            <div
+                                className="flex items-center px-4"
+                                style={{
+                                    height: 44,
+                                    background: "var(--color-panel)",
+                                    borderBottom: "1px solid var(--color-border-dim)",
+                                }}
+                            >
+                                <button
+                                    onClick={() => setMobileView("editor")}
+                                    style={{
+                                        background: "none",
+                                        border: "none",
+                                        color: "var(--color-text-muted)",
+                                        fontSize: 12,
+                                        cursor: "pointer",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 6,
+                                        padding: 0,
+                                    }}
+                                >
+                                    ← Back to Editor
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto">
+                                <InstructionsPanel />
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
 
             <MobileActionBar onTransmute={handleTransmute} />
         </div>
