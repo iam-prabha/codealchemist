@@ -8,7 +8,7 @@ import { ChevronDown } from "lucide-react";
 const faqs = [
     {
         question: "Is CodeAlchemist free to use?",
-        answer: "Yes! CodeAlchemist offers a free tier with access to the first 3 layers of each language, including Python, Rust, and TypeScript. You can complete basic exercises and get started with programming immediately.",
+        answer: "Yes! CodeAlchemist is completely free to use. You have full access to all 12 layers of our comprehensive curriculum for Python, Rust, and TypeScript.",
     },
     {
         question: "Which programming languages are supported?",
@@ -32,7 +32,7 @@ const faqs = [
     },
     {
         question: "How do AI hints work?",
-        answer: "Our AI hints system analyzes your code and provides contextual help when you're stuck. Available in Pro plans, hints range from general guidance to specific code suggestions, helping you learn without giving away the solution.",
+        answer: "Our AI hints system analyzes your code and provides contextual help when you're stuck. Hints range from general guidance to specific code suggestions, helping you learn without giving away the solution.",
     },
     {
         question: "What's the difference between Guided and Challenge mode?",

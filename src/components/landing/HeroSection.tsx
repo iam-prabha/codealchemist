@@ -91,7 +91,7 @@ export default function HeroSection({ onGetStarted }: HeroSectionProps) {
                         boxShadow: "0 0 30px var(--color-gold-glow), 0 4px 20px rgba(0,0,0,0.3)",
                     }}
                 >
-                    Get Started Free
+                    Get Started
                     <ArrowRight size={18} />
                 </motion.button>
 

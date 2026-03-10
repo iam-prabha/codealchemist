@@ -61,7 +61,7 @@ export default function SignUpForm() {
     return (
         <AuthCard
             title="Create your account"
-            subtitle="Start your coding journey for free"
+            subtitle="Start your coding journey"
             footer={
                 <p className="text-center text-sm text-text-muted">
                     Already have an account?{" "}

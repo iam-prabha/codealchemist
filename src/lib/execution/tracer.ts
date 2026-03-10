@@ -124,7 +124,7 @@ def __ca_trace_calls(frame, event, arg):
 sys.settrace(__ca_trace_calls)
 
 try:
-${code.split('\\n').map(line => '    ' + line).join('\\n')}
+${code.split('\n').map(line => '    ' + line).join('\n')}
 except Exception as e:
     sys.settrace(None)
     traceback.print_exc(file=sys.stderr)

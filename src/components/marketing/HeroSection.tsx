@@ -140,7 +140,7 @@ export default function HeroSection() {
                             href="/sign-up"
                             className="px-8 py-4 bg-gold hover:bg-gold/90 text-text-inverse rounded-full font-semibold text-lg transition-colors flex items-center justify-center gap-2"
                         >
-                            Start Coding Free →
+                            Start Coding →
                         </Link>
                         <a
                             href="#how-it-works"
@@ -196,11 +196,10 @@ export default function HeroSection() {
                                             scale: currentLang === lang.id ? 1.05 : 1,
                                             backgroundColor: currentLang === lang.id ? "var(--color-gold-dim)" : "transparent"
                                         }}
-                                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                                            currentLang === lang.id
+                                        className={`px-3 py-1 rounded text-xs font-medium transition-colors ${currentLang === lang.id
                                                 ? "text-gold"
                                                 : "text-text-muted hover:text-text-primary"
-                                        }`}
+                                            }`}
                                     >
                                         {lang.icon} {lang.name}
                                     </motion.button>
@@ -229,7 +228,7 @@ export default function HeroSection() {
                                 <span>Press Ctrl+Enter to transmute</span>
                             </div>
                             <div className="text-xs text-text-muted">
-                                ✨ AI hints available
+                                ✨ Hints available
                             </div>
                         </div>
                     </div>

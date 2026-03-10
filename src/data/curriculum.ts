@@ -612,7 +612,7 @@ export const CURRICULUM_LAYERS: Layer[] = [
                 },
                 goldenExample: {
                     python: `from typing import Protocol\n\nclass Speaker(Protocol):\n    def speak(self) -> str: ...\n\nclass Dog:\n    def speak(self) -> str:\n        return "Woof"\n\nprint(Dog().speak())`,
-                    rust: `trait Speaker {\n    fn speak(&self) -> &str;\n}\n\nstruct Dog;\n\nimpl Speaker for Dog {\n    fn speak(&self) -> &str {\n        "Woof"\n    }\n}\n\nfn main() {\n    println!("{}", Dog.speak());\n}`,
+                    rust: `trait Speaker {\n    fn speak(&self) -> &str;\n}\n\nstruct Dog;\n\nimpl Speaker for Dog {\n    fn speak(&self) -> &str {\n        \"Woof\"\n    }\n}\n\nfn main() {\n    let dog = Dog;\n    println!(\"{}\", dog.speak());\n}`,
                     typescript: `interface Speaker {\n    speak(): string;\n}\n\nclass Dog implements Speaker {\n    speak() {\n        return "Woof";\n    }\n}\n\nconsole.log(new Dog().speak());`
                 },
                 annotations: {

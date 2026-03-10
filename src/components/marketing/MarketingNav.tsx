@@ -11,7 +11,6 @@ const navItems = [
     { label: "Features", href: "#features" },
     { label: "How It Works", href: "#how-it-works" },
     { label: "Languages", href: "#languages" },
-    { label: "Pricing", href: "#pricing" },
     { label: "FAQ", href: "#faq" },
 ];
 
@@ -79,7 +78,7 @@ export default function MarketingNav() {
                                     href="/sign-up"
                                     className="px-4 py-2 bg-gold hover:bg-gold/90 text-text-inverse rounded-full font-medium transition-colors"
                                 >
-                                    Start for Free
+                                    Get Started
                                 </Link>
                             </>
                         )}
@@ -158,7 +157,7 @@ export default function MarketingNav() {
                                             onClick={() => setIsMobileMenuOpen(false)}
                                             className="block w-full text-center py-3 bg-gold hover:bg-gold/90 text-text-inverse rounded-lg font-medium transition-colors"
                                         >
-                                            Start for Free
+                                            Get Started
                                         </Link>
                                     </>
                                 )}

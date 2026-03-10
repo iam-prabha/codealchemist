@@ -32,7 +32,7 @@ export default function CTABannerSection() {
                         href="/sign-up"
                         className="inline-flex items-center px-8 py-4 bg-gold hover:bg-gold/90 text-text-inverse rounded-full font-semibold text-lg transition-colors"
                     >
-                        Create Free Account
+                        Create Account
                     </Link>
                 </div>
             </motion.div>
